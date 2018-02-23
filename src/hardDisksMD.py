@@ -239,3 +239,5 @@ print(times_pp)
 
 # Crear dos listas / diccionarios, colisiones entre particulas y colisiones con pared
 # Coger el primer elemento de ambas y ver cual es mas pequeño
+#bisect.insort( listacolmuro, [vdt,[i,im]] )
+#bisect.insort( listacol, [vdt,[i,j]] )
