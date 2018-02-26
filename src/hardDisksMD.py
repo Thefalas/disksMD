@@ -8,7 +8,7 @@ import random
 import bisect
 import numpy as np
 
-data_folder = "C:\Users\malopez\Desktop\disksMD\data"
+data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 restitution_coef = 1.0
 particle_radius = 1.0
 n_particles = 300
@@ -109,15 +109,14 @@ def nanIfNegative(t):
         return t
 
 def propagate(t):
-    """ Updates positions for all particles, lineal movement during a time t
-        It also modifies the lists containig collision times to reflect the
-        time that has passed """
+    global pos
+    """ Updates positions for all particles, lineal movement during a time t"""
     for i in range(n_particles):
         pos[i] = pos[i] + vel[i]*t
-    for i in range(n_particles):
-        times_pp[i,2] = times_pp[i,2] - t
-        times_pw[i,2] = times_pw[i,2] - t
-        
+
+    #times_pp[:,2] = times_pp[:,2] - t
+    #times_pp[:,2] = times_pp[:,2] - t    
+
 def detectCollisionTime(i, j):
     """ Returns the time until the next collision between particles i, j """
     r = distance(i, j)
@@ -220,19 +219,54 @@ def createCollisionList():
     #times_pp[:,0] = np.array([str(int(a)) for a in times_pp[:,0]])
     #times_pp[:,1] = np.array([str(int(a)) for a in times_pp[:,1]])
             
-def updatecollisionLists():
-    return 0
+def updateCollisionLists(t, i, j='none'):
+    """ Modifies the lists containig collision times to reflect the time that
+        has passed since last collision, deletes and recalculates all entries 
+        involving particles that interacted in last collision """
+    global times_pp, times_pw
+    # Advances all entries a time t (time since last collision)
+    times_pp[:,2] = times_pp[:,2] - t
+    times_pp[:,2] = times_pp[:,2] - t
+    
+    if j=='none':
+        # Particle-Wall collision, recalculates only entries involving i part.
+        # Delete certain entries, solution inspired by:
+        # https://www.w3resource.com/python-exercises/numpy/python-numpy-exercise-91.php
+        times_pp = times_pp[~np.isin(times_pp, [i]).any(axis=1)]
+        times_pw = times_pw[~np.isin(times_pw, [str(i)]).any(axis=1)]
+        
+        #Needed due to formating issues with times_pw
+        times_pw_float = np.array([float(a) for a in times_pw[:,2]])
+        
+        for a in range(n_particles):
+            if i==a: # Avoid i-i case
+                a=a+1
+            new_entry = detectCollisionTime(i, a)
+            index = bisect.bisect(times_pp[:,2], new_entry[0,2])
+            times_pp = np.insert(times_pp, index, new_entry)
+        for a in range(4):
+            new_entry = detectWallCollisionTime(i)
+            index = bisect.bisect(times_pw_float, float(new_entry[0,2])) #------ Problema con la salida formato array de detectWallCollisiontime
+            times_pw = np.insert(times_pw, index, new_entry)
+    else:
+        # Particle-particle collision, recalculates entries involving i and j.
+        times_pp = times_pp[~np.isin(times_pp, [i, j]).any(axis=1)]
+        times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
+    
+        times_pw[i] = detectWallCollisionTime(i)
+        times_pw[j] = detectWallCollisionTime(j)
   
 def computeNextCollision():
     """ Propagates particles until next collision and updates velocities 
         after it. Checks if next col. is particle-particle or particle-wall """
     t_pp = times_pp[0,2]
     t_pw = times_pw[0,2]
+    # Check if particle-particle or particle-wall collision
     if t_pp <= t_pw:
-        propagate(t_pp)
+        propagate(t_pp) # Propagate particles until current collision
         i = times_pp[0,0]
         j = times_pp[0,1]
-        particleCollision(i, j)
+        particleCollision(i, j) # Compute change in velocities due to collision
     else:
         propagate(t_pw)
         i = times_pw[0,0]
@@ -242,13 +276,13 @@ def computeNextCollision():
 def saveData(col_number):
     """ Saves the positions and velocities of every particle to an external
         file after current colision """
-    file_name_pos = data_folder + "\xy" + col_number + ".dat"
+    file_name_pos = data_folder + "/xy" + col_number + ".dat"
     with open(file_name_pos,'w') as file:
         for i in range(n_particles):
             file.write('{0:10.2f} {1:10.2f}\n'.format(pos[i,0], pos[i,1]))
     file.closed
     
-    file_name_vel = data_folder + "\vxvy" + col_number + ".dat"
+    file_name_vel = data_folder + "/vxvy" + col_number + ".dat"
     with open(file_name_vel,'w') as file:
         for i in range(n_particles):
             file.write('{0:10.2f} {1:10.2f}\n'.format(vel[i,0], vel[i,1]))
@@ -261,7 +295,7 @@ createWallCollisionList()
 createCollisionList()
 #for a in range(n_collisions):
  #   computeNextCollision()
- #   GUARDARARCHIVO POS-VEL
+ #   saveData(a)
     
 print(times_pw)
 print(times_pp)
