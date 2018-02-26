@@ -8,6 +8,7 @@ import random
 import bisect
 import numpy as np
 
+data_folder = "C:\Users\malopez\Desktop\disksMD\data"
 restitution_coef = 1.0
 particle_radius = 1.0
 n_particles = 300
@@ -171,8 +172,8 @@ def detectWallCollisionTime(i):
     times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
     return times_pw[0]
 
-def wallCollision(i):
-    wall = times_pw[i,1] # Determine wich wall the particle has collided with
+def wallCollision(i, wall):
+    global vel
     if (wall=='left' or wall=='right'):
         vel[i,0] = -restitution_coef * vel[i,0] # x component changes direction
         vel[i,1] = restitution_coef * vel[i,1]
@@ -181,15 +182,9 @@ def wallCollision(i):
         vel[i,0] = restitution_coef * vel[i,0]
 
 def particleCollision(i, j):
+    global vel
     vel[i] = vel[i] #Operaciones necesarias, habria que añadir un parámetro masa
     vel[j] = vel[j]
-
-def collision (i, j='none'):
-    """ Computes the change in velocities after a collision between i, j """
-    if j=='none':
-        wallCollision(i)
-    else:
-        particleCollision(i, j)
     
 def updateTimeLists(i, j='none'):
     """ Deletes all registries involving particles i, j and recalculates
@@ -227,11 +222,47 @@ def createCollisionList():
             
 def updatecollisionLists():
     return 0
+  
+def computeNextCollision():
+    """ Propagates particles until next collision and updates velocities 
+        after it. Checks if next col. is particle-particle or particle-wall """
+    t_pp = times_pp[0,2]
+    t_pw = times_pw[0,2]
+    if t_pp <= t_pw:
+        propagate(t_pp)
+        i = times_pp[0,0]
+        j = times_pp[0,1]
+        particleCollision(i, j)
+    else:
+        propagate(t_pw)
+        i = times_pw[0,0]
+        wall = times_pw[0,1]
+        wallCollision(i, wall)
+
+def saveData(col_number):
+    """ Saves the positions and velocities of every particle to an external
+        file after current colision """
+    file_name_pos = data_folder + "\xy" + col_number + ".dat"
+    with open(file_name_pos,'w') as file:
+        for i in range(n_particles):
+            file.write('{0:10.2f} {1:10.2f}\n'.format(pos[i,0], pos[i,1]))
+    file.closed
+    
+    file_name_vel = data_folder + "\vxvy" + col_number + ".dat"
+    with open(file_name_vel,'w') as file:
+        for i in range(n_particles):
+            file.write('{0:10.2f} {1:10.2f}\n'.format(vel[i,0], vel[i,1]))
+    file.closed          
+
     
 # Here begins the actual script
 initializeRandom()
 createWallCollisionList()
 createCollisionList()
+#for a in range(n_collisions):
+ #   computeNextCollision()
+ #   GUARDARARCHIVO POS-VEL
+    
 print(times_pw)
 print(times_pp)
         #bisect.bisect(np.array([float(a) for a in prueba[:,2]]))
