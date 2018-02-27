@@ -6,13 +6,16 @@ Created on Thu Feb 15 12:23:03 2018
 import math
 import random
 import bisect
+from operator import itemgetter, attrgetter
 import numpy as np
 
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
+eps = 5000*np.finfo(float).eps #Machine epsilon
+
 restitution_coef = 1.0
 particle_radius = 1.0
-n_particles = 150
-desired_collisions_per_particle = 6
+n_particles = 30
+desired_collisions_per_particle = 50
 n_collisions = n_particles*desired_collisions_per_particle
 
 scale_factor = 80
@@ -103,7 +106,7 @@ def relativeVelocity(i, j):
     return rel_v
 
 def infIfNegative(t):
-    if t < 0:
+    if t <= 0:
         return 'inf'
     else:
         return t
@@ -115,15 +118,31 @@ def nanIfNegative(t):
         return t
 
 def propagate(t):
-    global pos, vel
-    """ Updates positions for all particles, lineal movement during a time t"""
+    global pos, vel, times_pp, times_pw
+    """ Updates positions for all particles, lineal movement during a time t.
+        Modifies the lists containig collision times to reflect the time that
+        has passed since last collision """
+    # Reduced by a smolle amount to avoid singularity problems
+    #t=t-eps
     for i in range(n_particles):
-        pos[i] = pos[i] + vel[i]*t  
-
+        pos[i] = pos[i] + vel[i]*t
+        if pos[i,0] == particle_radius:
+            pos[i,0] = pos[i,0] + eps
+        elif pos[i,0] == size_X-particle_radius:
+            pos[i,0] = pos[i,0] - eps
+        elif pos[i,1] == particle_radius:
+            pos[i,1] = pos[i,1] + eps
+        elif pos[i,1] == size_Y-particle_radius:
+            pos[i,1] = pos[i,1] - eps
+    # Advances all entries a time t (time since last collision)
+    times_pp[:,2] = times_pp[:,2] - t
+    times_pw[:,2] = np.array([float(a) for a in times_pw[:,2]]) - t
+    
 def detectCollisionTime(i, j):
     """ Returns the time until the next collision between particles i, j """
     i = int(i)
     j = int(j)
+    
     r = distance(i, j)
     r2 = np.dot(r, r)
     v = relativeVelocity(i, j)
@@ -137,11 +156,11 @@ def detectCollisionTime(i, j):
     else:
         # The following formula has been taken from Eq: 14.2.2 in
         # 'The Art of Molecular Dynamics Simulations', D. Rapaport.
-        t = (-b - math.sqrt(inner_term))/v2
+        t = (-b - math.sqrt(inner_term))/(v2+eps)
         t = infIfNegative(t) # The collision ocurred in the past
 
-    part_i = np.array([str(i)])
-    part_j = np.array([str(j)])
+    part_i = np.array([i])
+    part_j = np.array([j])
     dt = np.array([t]) 
     times_pp = np.stack((part_i, part_j, dt), axis=1)
     return times_pp
@@ -160,17 +179,23 @@ def detectWallCollisionTime(i):
     y_topWall = size_Y
     y_bottomWall = 0.0
 
-    t_left = (particle_radius + x_leftWall - x)/vx
-    t_right = (-particle_radius + x_rightWall - x)/vx
-    t_top = (-particle_radius + y_topWall - y)/vy
-    t_bottom = (particle_radius + y_bottomWall - y)/vy
+    t_left = nanIfNegative((particle_radius + x_leftWall - x)/(vx+eps))
+    t_right = nanIfNegative((-particle_radius + x_rightWall - x)/(vx+eps))
+    t_top = nanIfNegative((-particle_radius + y_topWall - y)/(vy+eps))
+    t_bottom = nanIfNegative((particle_radius + y_bottomWall - y)/(vy+eps))
+    
+    """t_left = [t_left, "left"]
+    t_right = [t_right, "left"]
+    t_top = [t_top, "left"]
+    t_bottom = [t_bottom, "left"]
+    
+    times = sorted([t_left, t_right, t_top, t_bottom], key=itemgetter(0) )"""
     
     part_i = np.array([i for a in range(4)])
-    dt = np.array([t_left, t_right, t_top, t_bottom])
     wall = np.array(['left', 'right', 'top', 'bottom'])
+    dt = np.array([t_left, t_right, t_top, t_bottom])
     
     times_pw = np.stack((part_i, wall, dt), axis=1)
-    times_pw[:,2] = [nanIfNegative(float(a)) for a in times_pw[:,2]]
     # We need to sort the list in order to return only the element 
     # with the lowest collision time. This approach is similar to the
     # one found at: https://stackoverflow.com/a/2828121
@@ -186,10 +211,8 @@ def wallCollision(i, wall):
 
     if (wall=='left' or wall=='right'):
         vel[i,0] = -restitution_coef * vel[i,0] # x component changes direction
-        vel[i,1] = restitution_coef * vel[i,1]
     elif (wall=='top' or wall=='bottom'):
         vel[i,1] = -restitution_coef * vel[i,1] # y component changes direction
-        vel[i,0] = restitution_coef * vel[i,0]
 
 def particleCollision(i, j):
     global vel
@@ -229,27 +252,23 @@ def createCollisionList():
     #times_pp[:,1] = np.array([str(int(a)) for a in times_pp[:,1]])
             
 def updateCollisionLists(t, i, j='none'):
-    """ Modifies the lists containig collision times to reflect the time that
-        has passed since last collision, deletes and recalculates all entries 
-        involving particles that interacted in last collision """
+    """ Deletes and recalculates all entries involving particles that 
+        interacted in last collision """
     global times_pp, times_pw
     i = int(i)
-    # Advances all entries a time t (time since last collision)
-    times_pp[:,2] = times_pp[:,2] - t
-    times_pp[:,2] = times_pp[:,2] - t
     
     if j=='none':
         # Particle-Wall collision, recalculates only entries involving part. i
         # Delete certain entries, solution inspired by:
         # https://www.w3resource.com/python-exercises/numpy/python-numpy-exercise-91.php
-        times_pp = times_pp[~np.isin(times_pp, [i]).any(axis=1)]
+        times_pp = times_pp[~np.isin(times_pp, [i]).any(axis=1)] ################################ por aqui quiza esta el problema, refactorizar para usar listas
         times_pw = times_pw[~np.isin(times_pw, [str(i)]).any(axis=1)]
-        
+    
         # Need float conversion due to formating issues with times_pw
         times_pw_float = np.array([float(a) for a in times_pw[:,2]])
         # Now we calculate new elements and insert them in an ordered manner
         for a in range(n_particles):
-            if a==i and a!=n_particles-1: # Avoid i-i case
+            if (a==i and a!=(n_particles-1)): # Avoid i-i case
                 a=a+1
             new_entry = detectCollisionTime(i, a)
             if new_entry[0,2] == 'inf':
@@ -257,18 +276,19 @@ def updateCollisionLists(t, i, j='none'):
             else:
                 index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
             times_pp = np.insert(times_pp, index, new_entry, axis=0)
-        for a in range(4):
-            new_entry = detectWallCollisionTime(i)
-            index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
-            times_pw = np.insert(times_pw, index, new_entry, axis=0)
+        
+        # Wall update
+        new_entry = detectWallCollisionTime(i)
+        index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
+        times_pw = np.insert(times_pw, index, new_entry, axis=0)
     else:
         j = int(j)
         # Particle-particle collision, recalculates entries involving i and j.
         times_pp = times_pp[~np.isin(times_pp, [i, j]).any(axis=1)]
         times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
-    
+        
         for a in range(n_particles):
-            if a==i and a!=n_particles-1: # Avoid i-i case
+            if (a==i and a!=(n_particles-1)): # Avoid i-i case
                 a=a+1
             new_entry = detectCollisionTime(i, a)
             if new_entry[0,2] == 'inf':
@@ -277,7 +297,7 @@ def updateCollisionLists(t, i, j='none'):
                 index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
             times_pp = np.insert(times_pp, index, new_entry, axis=0)
         for a in range(n_particles):
-            if (a==j or a==i) and a!=n_particles-1 : # Avoid j-j case and j-i case (already calculated)
+            if ((a==j or a==i) and a!=n_particles-1): # Avoid j-j case and j-i case (already calculated)
                 a=a+1
             new_entry = detectCollisionTime(j, a)
             if new_entry[0,2] == 'inf':
@@ -287,13 +307,14 @@ def updateCollisionLists(t, i, j='none'):
             times_pp = np.insert(times_pp, index, new_entry, axis=0)
         
         times_pw_float = np.array([float(a) for a in times_pw[:,2]])
-        for a in range(4):
-            new_entry = detectWallCollisionTime(i)
-            new_entry_j = detectWallCollisionTime(j)
-            index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
-            index_j = bisect.bisect(times_pw_float, float(new_entry[0,2]))
-            times_pw = np.insert(times_pw, index, new_entry, axis=0)
-            times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
+        
+        # Wall update
+        new_entry = detectWallCollisionTime(i)
+        new_entry_j = detectWallCollisionTime(j)
+        index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
+        index_j = bisect.bisect(times_pw_float, float(new_entry[0,2]))
+        times_pw = np.insert(times_pw, index, new_entry, axis=0)
+        times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
         
 
   
@@ -301,7 +322,7 @@ def computeNextCollision():
     """ Propagates particles until next collision and updates velocities 
         after it. Checks if next col. is particle-particle or particle-wall """
     global pos, vel
-    t_pp = times_pp[0,2]
+    t_pp = float(times_pp[0,2])
     t_pw = float(times_pw[0,2])
     # Check if particle-particle or particle-wall collision
     if t_pp <= t_pw:
@@ -337,17 +358,7 @@ def saveData(col_number):
 initializeRandom()
 createWallCollisionList()
 createCollisionList()
-for a in range(n_collisions):
+for d in range(n_collisions):
     computeNextCollision()
-    saveData(a)
-    print("Saving file for colission nº: "+str(a))
-    
-#print(times_pw)
-#print(times_pp)
-        #bisect.bisect(np.array([float(a) for a in prueba[:,2]]))
-        #bisect.insort(prueba, tau) # Bisect for creating an ordered list
-
-# Crear dos listas / diccionarios, colisiones entre particulas y colisiones con pared
-# Coger el primer elemento de ambas y ver cual es mas pequeño
-#bisect.insort( listacolmuro, [vdt,[i,im]] )
-#bisect.insort( listacol, [vdt,[i,j]] )
+    saveData(d)
+    print("Saving file for colission nº: " + str(d))
