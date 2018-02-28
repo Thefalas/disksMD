@@ -112,7 +112,7 @@ def infIfNegative(t):
         return t
 
 def nanIfNegative(t):
-    if t < 0:
+    if t <= 0:
         return math.nan
     else:
         return t
@@ -122,10 +122,11 @@ def propagate(t):
     """ Updates positions for all particles, lineal movement during a time t.
         Modifies the lists containig collision times to reflect the time that
         has passed since last collision """
-    # Reduced by a smolle amount to avoid singularity problems
+    # Reduced by a small amount to avoid singularity problems
     #t=t-eps
     for i in range(n_particles):
         pos[i] = pos[i] + vel[i]*t
+        
         if pos[i,0] == particle_radius:
             pos[i,0] = pos[i,0] + eps
         elif pos[i,0] == size_X-particle_radius:
@@ -353,7 +354,7 @@ def saveData(col_number):
             file.write('{0:10.2f} {1:10.2f}\n'.format(vel[i,0], vel[i,1]))
     file.closed          
 
-    
+#times_pw = list(times_pw)    
 # Here begins the actual script
 initializeRandom()
 createWallCollisionList()
