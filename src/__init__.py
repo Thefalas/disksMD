@@ -8,6 +8,9 @@ import random
 import bisect
 from operator import itemgetter, attrgetter
 import numpy as np
+from initialization import initRandomPos, initRandomVel
+from measure import distance, relativeVelocity
+from tools import nanIfNegative, infIfNegative
 
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 eps = 5000*np.finfo(float).eps #Machine epsilon
@@ -23,16 +26,6 @@ form_factor = 16/9
 
 size_X = scale_factor*particle_radius
 size_Y = scale_factor*particle_radius/form_factor
-
-pos_X = np.array([0.0 for i in range(n_particles)])
-pos_Y = np.array([0.0 for i in range(n_particles)])
-# Initialize particle positions as a 2D numpy array.
-pos = np.stack((pos_X, pos_Y), axis=1)
-
-vel_X = np.array([random.uniform(-5, 5) for i in range(n_particles)])
-vel_Y = np.array([random.uniform(-5, 5) for i in range(n_particles)])
-# Initialize particle velocities as a 2D numpy array.
-vel = np.stack((vel_X, vel_Y), axis=1) #Deberia ser una dist gaussiana
 
 # Initialize two arrays for storing particle-particle and particle-wall
 # collision times; apart from time t, they save the indexes of interacting
@@ -52,70 +45,6 @@ part_j = np.array([0 for i in range(pp_elements)])
 dt = np.array([0.0 for i in range(pp_elements)])
 
 times_pp = np.stack((part_i, part_j, dt), axis=1)
-
-def initializeRandom():
-    """ Initializes particle positions and velocities, makes sure that
-        no particles overlap """
-    global pos_X, pos_Y, vel_X, vel_Y, pos, vel
-    # Reduced sizes so that particles are not generated inside walls
-    reduc_size_X = size_X - particle_radius
-    reduc_size_Y = size_Y - particle_radius
-    # First particle is generated in a random position.
-    pos_X[0] = random.uniform(0+particle_radius, reduc_size_X)
-    pos_Y[0] = random.uniform(0+particle_radius, reduc_size_Y)
-    # From 2nd particle we need to check if it overlaps with previous ones.
-    for i in range(1, n_particles):
-       overlap = False
-       # While the distance is greater than 2 radius, generates new particles.
-       while overlap==False:
-           pos_X[i] = random.uniform(0+particle_radius, reduc_size_X)
-           pos_Y[i] = random.uniform(0+particle_radius, reduc_size_Y)
-           # Checking that it doesn't overlap with existent particles.
-           for j in range(0, i):
-               overlap = (distanceModulus(i, j) > 2*particle_radius)
-               if overlap==False:
-                  break
-    pos = np.stack((pos_X, pos_Y), axis=1)
-    
-    vel_X = np.array([random.uniform(-5, 5) for i in range(n_particles)])
-    vel_Y = np.array([random.uniform(-5, 5) for i in range(n_particles)])
-    # Initialize particle velocities as a 2D numpy array.
-    vel = np.stack((vel_X, vel_Y), axis=1) #Deberia ser una dist gaussiana
-    
-def distance(i, j):
-    """ Returns the distance between two particles i, j as a numpy array """
-    i = int(i)
-    j = int(j)
-    dist = pos[i] - pos[j]
-    return dist
-
-def distanceModulus(i, j):
-    """ Measures the distance modulus between two particles i, j """
-    i = int(i)
-    j = int(j)
-    dist_X = pos_X[j] - pos_X[i]
-    dist_Y = pos_Y[j] - pos_Y[i]
-    dist = math.sqrt(dist_X*dist_X + dist_Y*dist_Y)
-    return dist
-
-def relativeVelocity(i, j):
-    """ Measures the relative velocity between two particles i, j """
-    i = int(i)
-    j = int(j)
-    rel_v = vel[i] - vel[j]
-    return rel_v
-
-def infIfNegative(t):
-    if t <= 0:
-        return 'inf'
-    else:
-        return t
-
-def nanIfNegative(t):
-    if t <= 0:
-        return math.nan
-    else:
-        return t
 
 def propagate(t):
     global pos, vel, times_pp, times_pw
@@ -144,9 +73,9 @@ def detectCollisionTime(i, j):
     i = int(i)
     j = int(j)
     
-    r = distance(i, j)
+    r = distance(i, j, pos)
     r2 = np.dot(r, r)
-    v = relativeVelocity(i, j)
+    v = relativeVelocity(i, j, vel)
     v2 = np.dot(v, v)
     b = np.dot(r, v)
     d = 2*particle_radius
@@ -220,8 +149,8 @@ def particleCollision(i, j):
     i = int(i)
     j = int(j)
     
-    r = distance(i, j)
-    v = relativeVelocity(i, j)
+    r = distance(i, j, pos)
+    v = relativeVelocity(i, j, vel)
     b = np.dot(r, v)
     # The following formula has been taken from Eq: 14.2.4 in
     # 'The Art of Molecular Dynamics Simulations', D. Rapaport.
@@ -356,7 +285,8 @@ def saveData(col_number):
 
 #times_pw = list(times_pw)    
 # Here begins the actual script
-initializeRandom()
+pos = initRandomPos(particle_radius, n_particles, size_X, size_Y)
+vel = initRandomVel(n_particles)
 createWallCollisionList()
 createCollisionList()
 for d in range(n_collisions):
