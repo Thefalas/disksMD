@@ -6,7 +6,8 @@ Created on Wed Feb 28 13:58:14 2018
 """
 import numpy as np
 
-eps = 5000*np.finfo(float).eps # Machine epsilon
+#eps = 5000*np.finfo(float).eps # Machine epsilon
+eps = 0.0001
 
 def propagate(t, n_particles, particle_radius, size_X, size_Y, pos, vel):
     """ Updates positions for all particles, lineal movement during a time t.

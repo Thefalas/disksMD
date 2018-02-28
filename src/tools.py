@@ -5,7 +5,6 @@ Created on Wed Feb 28 12:53:33 2018
 @author: malopez
 """
 import math
-import json
 
 def infIfNegative(t):
     if t <= 0:
@@ -33,8 +32,3 @@ def saveData(col_number, data_folder, n_particles, pos, vel):
         for i in range(n_particles):
             file.write('{0:10.2f} {1:10.2f}\n'.format(vel[i,0], vel[i,1]))
     file.closed
-    
-def loadSettings():
-    with open("settings.json",'r') as file:
-        settings = json.load(file)
-        globals().update(settings)
