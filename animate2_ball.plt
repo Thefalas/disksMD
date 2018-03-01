@@ -6,8 +6,8 @@ set t wxt
 #set t png
 
 nt=1500
-LX=25
-LY=14
+LX=20
+LY=11.25
 
 set xrange[0:LX]
 set yrange[0:LY]
@@ -16,7 +16,7 @@ set size ratio LY/LX
 cd 'data'
 
 do for[count=0:nt]{
-    pause 0.9
+    pause 0.5
     frame = 'xy'.count
     if (count<1000) {frame='xy0'.count}
     if (count<100) {frame='xy00'.count}

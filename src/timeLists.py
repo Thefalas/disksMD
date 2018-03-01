@@ -49,6 +49,17 @@ def createCollisionList(n_particles, particle_radius, pos, vel):
     return times_pp
     #times_pp[:,0] = np.array([str(int(a)) for a in times_pp[:,0]])
     #times_pp[:,1] = np.array([str(int(a)) for a in times_pp[:,1]])
+
+def deleteEntries(times_pp, times_pw, i, j='none'):
+    # Delete certain entries, solution inspired by:
+    # https://www.w3resource.com/python-exercises/numpy/python-numpy-exercise-91.php
+    if j=='none':
+        times_pp = times_pp[~np.isin(times_pp, [float(i)]).any(axis=1)] ################################ por aqui quiza esta el problema, es posible que esté borrando mas entradas de la cuenta
+        times_pw = times_pw[~np.isin(times_pw, [str(i)]).any(axis=1)]
+    else:   
+        times_pp = times_pp[~np.isin(times_pp, [float(i), float(j)]).any(axis=1)]
+        times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
+    return (times_pp, times_pw)
             
 def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j='none'):
     """ Deletes and recalculates all entries involving particles that 
@@ -56,15 +67,21 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, v
     i = int(i)
     
     if j=='none':
-        wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i)
+        result = wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i)
+        times_pp = result[0]
+        times_pw = result[1]
     else:
-        partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j)
-    
+        result = partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j)
+        times_pp = result[0]
+        times_pw = result[1]
+        
     return (times_pp, times_pw)
 
 def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i):
     # Particle-Wall collision, recalculates only entries involving part. i
-    deleteEntries(times_pp, times_pw, i)
+    result = deleteEntries(times_pp, times_pw, i)
+    times_pp = result[0]
+    times_pw = result[1]
     
     # Need float conversion due to formating issues with times_pw
     times_pw_float = np.array([float(a) for a in times_pw[:,2]])
@@ -83,11 +100,15 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     new_entry = detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y)
     index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
-
+    
+    return (times_pp, times_pw)
+###################################################################################REVISAR
 def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j):
     j = int(j)
     # Particle-particle collision, recalculates entries involving i and j.
-    deleteEntries(times_pp, times_pw, i, j)
+    result = deleteEntries(times_pp, times_pw, i, j)
+    times_pp = result[0]
+    times_pw = result[1]
         
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case
@@ -118,12 +139,4 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
     times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
     
-def deleteEntries(times_pp, times_pw, i, j='none'):
-    # Delete certain entries, solution inspired by:
-    # https://www.w3resource.com/python-exercises/numpy/python-numpy-exercise-91.php
-    if j=='none':
-        times_pp = times_pp[~np.isin(times_pp, [float(i)]).any(axis=1)] ################################ por aqui quiza esta el problema, refactorizar para usar listas
-        times_pw = times_pw[~np.isin(times_pw, [str(i)]).any(axis=1)]
-    else:   
-        times_pp = times_pp[~np.isin(times_pp, [float(i), float(j)]).any(axis=1)]
-        times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
+    return (times_pp, times_pw)

@@ -24,12 +24,12 @@ def detectCollisionTime(i, j, pos, vel, particle_radius):
     d = 2*particle_radius
     
     inner_term = b*b - v2*(r2 - d*d)
-    if inner_term<0:
+    if (inner_term<0 or v2==0):
         t = 'inf'
     else:
         # The following formula has been taken from Eq: 14.2.2 in
         # 'The Art of Molecular Dynamics Simulations', D. Rapaport.
-        t = (-b - math.sqrt(inner_term))/(v2+eps) # or (v2+eps)
+        t = (-b - math.sqrt(inner_term))/v2 # or (v2+eps)
         t = infIfNegative(t) # The collision ocurred in the past
 
     part_i = np.array([i])
@@ -51,19 +51,20 @@ def detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y):
     x_rightWall = size_X
     y_topWall = size_Y
     y_bottomWall = 0.0
-
-    t_left = nanIfNegative((particle_radius + x_leftWall - x)/vx) #or (vx+eps)
-    t_right = nanIfNegative((-particle_radius + x_rightWall - x)/vx)
-    t_top = nanIfNegative((-particle_radius + y_topWall - y)/vy)
-    t_bottom = nanIfNegative((particle_radius + y_bottomWall - y)/vy)
     
-    """t_left = [t_left, "left"]
-    t_right = [t_right, "left"]
-    t_top = [t_top, "left"]
-    t_bottom = [t_bottom, "left"]
-    
-    times = sorted([t_left, t_right, t_top, t_bottom], key=itemgetter(0) )"""
-    
+    if vx==0:
+        t_left = math.nan
+        t_right = math.nan
+    else:
+        t_left = nanIfNegative((particle_radius + x_leftWall - x)/vx) #or (vx+eps)
+        t_right = nanIfNegative((-particle_radius + x_rightWall - x)/vx)
+    if vy==0:
+        t_top = math.nan
+        t_bottom = math.nan
+    else:
+        t_top = nanIfNegative((-particle_radius + y_topWall - y)/vy)
+        t_bottom = nanIfNegative((particle_radius + y_bottomWall - y)/vy)
+       
     part_i = np.array([i for a in range(4)])
     wall = np.array(['left', 'right', 'top', 'bottom'])
     dt = np.array([t_left, t_right, t_top, t_bottom])

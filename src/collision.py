@@ -16,6 +16,8 @@ def wallCollision(i, wall, vel, restitution_coef):
     elif (wall=='top' or wall=='bottom'):
         vel[i,1] = -restitution_coef * vel[i,1] # y component changes direction
 
+    return vel
+
 def particleCollision(i, j, vel, pos, particle_radius):
     i = int(i)
     j = int(j)
@@ -29,3 +31,5 @@ def particleCollision(i, j, vel, pos, particle_radius):
     # TODO: a mass parameter would be useful whe expanding functionality
     vel[i] = vel[i] + delta_v 
     vel[j] = vel[j] - delta_v
+    
+    return vel
