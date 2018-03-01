@@ -25,12 +25,12 @@ def detectCollisionTime(i, j, pos, vel, particle_radius):
     
     inner_term = b*b - v2*(r2 - d*d)
     if (inner_term<0 or v2==0):
-        t = math.nan#'inf'
+        t = 'inf'
     else:
         # The following formula has been taken from Eq: 14.2.2 in
         # 'The Art of Molecular Dynamics Simulations', D. Rapaport.
         t = (-b - math.sqrt(inner_term))/v2 # or (v2+eps)
-        t = nanIfNegative(t)#infIfNegative(t) # The collision ocurred in the past
+        t = infIfNegative(t) # The collision ocurred in the past
 
     part_i = np.array([i])
     part_j = np.array([j])

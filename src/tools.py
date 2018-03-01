@@ -5,6 +5,7 @@ Created on Wed Feb 28 12:53:33 2018
 @author: malopez
 """
 import math
+import numpy as np
 
 def infIfNegative(t):
     if t <= 0:
@@ -17,6 +18,10 @@ def nanIfNegative(t):
         return math.nan
     else:
         return t
+    
+def deleteInfs(timesList):
+    timesList = timesList[~np.isin(timesList, [9999]).any(axis=1)] #################### no borra bien los infs HACER QUE FUNCIONEEEE o solucionarlo al calcular tiempos pp
+    return timesList
 
 def saveData(col_number, data_folder, n_particles, pos, vel):
     """ Saves the positions and velocities of every particle to an external

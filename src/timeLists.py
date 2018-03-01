@@ -8,6 +8,7 @@ import math
 import bisect
 import numpy as np
 from colTimes import detectWallCollisionTime, detectCollisionTime
+from tools import deleteInfs
 
 def createWallCollisionList(n_particles, particle_radius, size_X, size_Y, pos, vel):
     """ Creates an ordered list times_pw with collision times 
@@ -60,15 +61,12 @@ def deleteEntries(times_pp, times_pw, i, j='none'):
         times_pp = times_pp[~np.isin(times_pp, [float(i), float(j)]).any(axis=1)]
         times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
     return (times_pp, times_pw)
-
-def deleteInfs(times_pp):
-    times_pp = times_pp[~np.isin(times_pp, [float(math.nan)]).any(axis=1)] #################### no borra bien los infs HACER QUE FUNCIONEEEE o solucionarlo al calcular tiempos pp
-    return times_pp
             
 def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j='none'):
     """ Deletes and recalculates all entries involving particles that 
         interacted in last collision """
     i = int(i)
+    times_pp = deleteInfs(times_pp)
     
     if j=='none':
         result = wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i)
@@ -78,7 +76,8 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, v
         result = partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j)
         times_pp = result[0]
         times_pw = result[1]
-        
+    
+    times_pp = deleteInfs(times_pp)
     return (times_pp, times_pw)
 
 def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i):
@@ -86,14 +85,13 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     result = deleteEntries(times_pp, times_pw, i)
     times_pp = result[0]
     times_pw = result[1]
-    times_pp = deleteInfs(times_pp)
     
     # Now we calculate new elements and insert them in an ordered manner
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case
             a=a+1
         new_entry = detectCollisionTime(i, a, pos, vel, particle_radius)
-        if new_entry[0,2] == math.nan: #=='inf'
+        if new_entry[0,2] =='inf':
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
@@ -116,13 +114,12 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     result = deleteEntries(times_pp, times_pw, i, j)
     times_pp = result[0]
     times_pw = result[1]
-    times_pp = deleteInfs(times_pp)
         
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case
             a=a+1
         new_entry = detectCollisionTime(i, a, pos, vel, particle_radius)
-        if new_entry[0,2] == math.nan:#=='inf'
+        if new_entry[0,2] =='inf':
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
@@ -131,7 +128,7 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
         if ((a==j or a==i) and a!=n_particles-1): # Avoid j-j case and j-i case (already calculated)
             a=a+1
         new_entry = detectCollisionTime(a, j, pos, vel, particle_radius)
-        if new_entry[0,2] == math.nan:#=='inf'
+        if new_entry[0,2] =='inf':
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))

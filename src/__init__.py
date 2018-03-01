@@ -8,6 +8,7 @@ from initialization import initRandomPos, initRandomVel
 from tools import saveData
 from timeLists import createCollisionList, createWallCollisionList
 from mainLoop import computeNextCollision
+from tools import deleteInfs
 
 #eps = 5000*np.finfo(float).eps # Machine epsilon
 
@@ -31,6 +32,8 @@ pos = initRandomPos(particle_radius, n_particles, size_X, size_Y)
 vel = initRandomVel(n_particles)
 times_pw = createWallCollisionList(n_particles, particle_radius, size_X, size_Y, pos, vel)
 times_pp = createCollisionList(n_particles, particle_radius, pos, vel)
+
+times_pp = deleteInfs(times_pp)
 
 # We call the main loop for every collision
 for c in range(n_collisions):
