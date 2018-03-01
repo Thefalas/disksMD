@@ -7,7 +7,7 @@ set t wxt
 
 nt=1500
 LX=20
-LY=11.25
+LY=15
 
 set xrange[0:LX]
 set yrange[0:LY]
