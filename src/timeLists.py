@@ -60,6 +60,10 @@ def deleteEntries(times_pp, times_pw, i, j='none'):
         times_pp = times_pp[~np.isin(times_pp, [float(i), float(j)]).any(axis=1)]
         times_pw = times_pw[~np.isin(times_pw, [str(i), str(j)]).any(axis=1)]
     return (times_pp, times_pw)
+
+def deleteInfs(times_pp):
+    times_pp = times_pp[~np.isin(times_pp, [float(math.nan)]).any(axis=1)] #################### no borra bien los infs HACER QUE FUNCIONEEEE o solucionarlo al calcular tiempos pp
+    return times_pp
             
 def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j='none'):
     """ Deletes and recalculates all entries involving particles that 
@@ -82,39 +86,43 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     result = deleteEntries(times_pp, times_pw, i)
     times_pp = result[0]
     times_pw = result[1]
+    times_pp = deleteInfs(times_pp)
     
-    # Need float conversion due to formating issues with times_pw
-    times_pw_float = np.array([float(a) for a in times_pw[:,2]])
     # Now we calculate new elements and insert them in an ordered manner
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case
             a=a+1
         new_entry = detectCollisionTime(i, a, pos, vel, particle_radius)
-        if new_entry[0,2] == 'inf':
+        if new_entry[0,2] == math.nan: #=='inf'
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
         times_pp = np.insert(times_pp, index, new_entry, axis=0)
-        
+    
+    # Need float conversion due to formating issues with times_pw
+    times_pw_float = np.array([float(a) for a in times_pw[:,2]])    
     # Wall update
     new_entry = detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y)
     index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
     
     return (times_pp, times_pw)
-###################################################################################REVISAR
+###################################################################################REVISAR el error esta en que las nuevas colisiones se meten desordenadas
+    # al menos en la lista pw sucede esto. En la lista times_pp se meten los nuevos valores debajo de los inf, eso no deberia ser -----BORRAR INFS en deleteEntries
+    #cCREAR FUNCION deleteInfs para times_pp
 def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i, j):
     j = int(j)
     # Particle-particle collision, recalculates entries involving i and j.
     result = deleteEntries(times_pp, times_pw, i, j)
     times_pp = result[0]
     times_pw = result[1]
+    times_pp = deleteInfs(times_pp)
         
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case
             a=a+1
         new_entry = detectCollisionTime(i, a, pos, vel, particle_radius)
-        if new_entry[0,2] == 'inf':
+        if new_entry[0,2] == math.nan:#=='inf'
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
@@ -122,20 +130,19 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     for a in range(n_particles):
         if ((a==j or a==i) and a!=n_particles-1): # Avoid j-j case and j-i case (already calculated)
             a=a+1
-        new_entry = detectCollisionTime(j, a, pos, vel, particle_radius)
-        if new_entry[0,2] == 'inf':
+        new_entry = detectCollisionTime(a, j, pos, vel, particle_radius)
+        if new_entry[0,2] == math.nan:#=='inf'
             index = -1
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
         times_pp = np.insert(times_pp, index, new_entry, axis=0)
         
-    times_pw_float = np.array([float(a) for a in times_pw[:,2]])
-        
+    times_pw_float = np.array([float(a) for a in times_pw[:,2]])       
     # Wall update
     new_entry = detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y)
     new_entry_j = detectWallCollisionTime(j, pos, vel, particle_radius, size_X, size_Y)
     index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
-    index_j = bisect.bisect(times_pw_float, float(new_entry[0,2]))
+    index_j = bisect.bisect(times_pw_float, float(new_entry_j[0,2]))
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
     times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
     

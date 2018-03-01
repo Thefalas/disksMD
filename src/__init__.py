@@ -4,19 +4,18 @@ Created on Thu Feb 15 12:23:03 2018
 @author: Miguel Ángel López Castaño
 """
 #TODO: Comentar mas todo el proceso ----------------------------------------------------------
-import numpy as np
 from initialization import initRandomPos, initRandomVel
 from tools import saveData
 from timeLists import createCollisionList, createWallCollisionList
 from mainLoop import computeNextCollision
 
-eps = 5000*np.finfo(float).eps # Machine epsilon
+#eps = 5000*np.finfo(float).eps # Machine epsilon
 
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 restitution_coef = 1.0
 particle_radius = 1.0
-n_particles = 30
-desired_collisions_per_particle = 30
+n_particles = 5 #por que minimo 3?
+desired_collisions_per_particle = 10
 n_collisions = n_particles*desired_collisions_per_particle
 
 scale_factor = 20
@@ -41,8 +40,8 @@ for c in range(n_collisions):
     vel = result[1]
     times_pp = result[2]
     times_pw = result[3]
-    #print(times_pp)
-    #print(times_pw)
+    print(times_pp)
+    print(times_pw)
     
     saveData(c, data_folder, n_particles, pos, vel)
     print("Saving file for colission nº: "+str(c+1)+" / "+str(n_collisions))
