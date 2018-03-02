@@ -86,7 +86,8 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     times_pp = result[0]
     times_pw = result[1]
     
-    # Now we calculate new elements and insert them in an ordered manner
+    # Now we calculate new elements and insert them in an ordered manner ####################PROBLEMA EN LAS COLISIONES FANTASMA (DOBLES CON TIEMPOS PEQUEÑOS) DE LAS PARTICULAS
+    # CON LOS MUROS, PUESTO QUE LES CAMBIA LA VELOCIDAD DOS VECES
     for a in range(n_particles):
         if (a==i and a!=(n_particles-1)): # Avoid i-i case  and a!=(n_particles-1) ########################### posible error en la comparacion, revisar indices
             a=a+1
