@@ -14,7 +14,7 @@ from tools import deleteInfs
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 restitution_coef = 1.0
 particle_radius = 1.0
-n_particles = 15 #por que minimo 3?
+n_particles = 5 #por que minimo 3?
 desired_collisions_per_particle = 10
 n_collisions = n_particles*desired_collisions_per_particle
 size_X = 20
@@ -48,5 +48,5 @@ for c in range(n_collisions):
     # We save positions and velocities data after current collision
     saveData(c, data_folder, n_particles, pos, vel)
     print("Saving file for colission nº: "+str(c+1)+" / "+str(n_collisions))
-
+# End of the simulation
 print("Simulation finished, data can be found in: " + data_folder)

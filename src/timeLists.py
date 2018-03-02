@@ -66,7 +66,7 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, v
     """ Deletes and recalculates all entries involving particles that 
         interacted in last collision """
     i = int(i)
-    times_pp = deleteInfs(times_pp)
+    times_pp = deleteInfs(times_pp) # Making sure that no infinite values come into the process
     
     if j=='none':
         result = wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i)
@@ -77,7 +77,7 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, v
         times_pp = result[0]
         times_pw = result[1]
     
-    times_pp = deleteInfs(times_pp)
+    times_pp = deleteInfs(times_pp) # Cleaning arrays of unnecessary entries
     return (times_pp, times_pw)
 
 def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i):
@@ -88,7 +88,7 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     
     # Now we calculate new elements and insert them in an ordered manner
     for a in range(n_particles):
-        if (a==i and a!=(n_particles-1)): # Avoid i-i case
+        if (a==i and a!=(n_particles-1)): # Avoid i-i case  and a!=(n_particles-1) ########################### posible error en la comparacion, revisar indices
             a=a+1
         new_entry = detectCollisionTime(i, a, pos, vel, particle_radius)
         if new_entry[0,2] =='inf':
@@ -101,7 +101,7 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
     times_pw_float = np.array([float(a) for a in times_pw[:,2]])    
     # Wall update
     new_entry = detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y)
-    index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
+    index = bisect.bisect(times_pw_float, float(new_entry[0,2])) ########################################### Posible error al ordenar lista times_pp
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
     
     return (times_pp, times_pw)
