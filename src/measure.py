@@ -23,7 +23,8 @@ def distanceModulus(i, j, pos_X, pos_Y):
     return dist
 
 def relativeVelocity(i, j, vel):
-    """ Measures the relative velocity between two particles i, j """
+    """ Measures the relative velocity between two particles i, j as a numpy
+        array to operate with it as a vector later on """
     i = int(i)
     j = int(j)
     rel_v = vel[i] - vel[j]

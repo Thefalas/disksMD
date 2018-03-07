@@ -41,8 +41,10 @@ def initRandomPos(particle_radius, n_particles, size_X, size_Y):
 def initRandomVel(n_particles):
     """ Initializes particle positions and velocities, makes sure that
         no particles overlap """  
-    vel_X = np.array([random.uniform(-5, 5) for i in range(n_particles)])
-    vel_Y = np.array([random.uniform(-5, 5) for i in range(n_particles)])
+    vel_X = np.array([random.gauss(0, 3) for i in range(n_particles)])
+    vel_Y = np.array([random.gauss(0, 3) for i in range(n_particles)])
+#    vel_X = np.array([random.uniform(-5, 5) for i in range(n_particles)])
+#    vel_Y = np.array([random.uniform(-5, 5) for i in range(n_particles)])
     # Initialize particle velocities as a 2D numpy array.
     vel = np.stack((vel_X, vel_Y), axis=1) #Deberia ser una dist gaussiana
     return vel

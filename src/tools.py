@@ -7,7 +7,7 @@ Created on Wed Feb 28 12:53:33 2018
 import math
 import numpy as np
 
-eps = 5000*np.finfo(float).eps
+eps = 500*np.finfo(float).eps # Machine epsilon
 
 def infIfNegative(t):
     if t <= eps:
@@ -21,9 +21,9 @@ def nanIfNegative(t):
     else:
         return t
     
-def deleteInfs(timesList):
-    timesList = timesList[~np.isin(timesList, [9999]).any(axis=1)] #################### no borra bien los infs HACER QUE FUNCIONEEEE o solucionarlo al calcular tiempos pp
-    return timesList
+#def deleteInfs(timesList):
+#    timesList = timesList[~np.isin(timesList, ['inf']).any(axis=1)]
+#    return timesList
 
 def saveData(col_number, data_folder, n_particles, pos, vel):
     """ Saves the positions and velocities of every particle to an external

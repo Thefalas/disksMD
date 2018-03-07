@@ -9,22 +9,23 @@ import numpy as np
 from measure import distance, relativeVelocity
 from tools import nanIfNegative, infIfNegative
 
-#eps = 5000*np.finfo(float).eps # Machine epsilon
-
 def detectCollisionTime(i, j, pos, vel, particle_radius):
     """ Returns the time until the next collision between particles i, j """
     i = int(i)
     j = int(j)
     
+    # Quantities required in following formula
     r = distance(i, j, pos)
     r2 = np.dot(r, r)
     v = relativeVelocity(i, j, vel)
     v2 = np.dot(v, v)
     b = np.dot(r, v)
     d = 2*particle_radius
-    
+    # We name 'inner_term' everything that will fall under the square root 
     inner_term = b*b - v2*(r2 - d*d)
-    if (inner_term<0 or v2==0 or i==j):
+    
+    # We need to filter non-valid results
+    if (inner_term<0 or v2<=0 or i==j):
         t = 'inf'
     else:
         # The following formula has been taken from Eq: 14.2.2 in
@@ -35,6 +36,7 @@ def detectCollisionTime(i, j, pos, vel, particle_radius):
     part_i = np.array([i])
     part_j = np.array([j])
     dt = np.array([t]) 
+    # A single-row array is returned
     times_pp = np.stack((part_i, part_j, dt), axis=1)
     return times_pp
     
@@ -52,13 +54,13 @@ def detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y):
     y_topWall = size_Y
     y_bottomWall = 0.0
     
-    if vx==0:
+    if vx == 0:
         t_left = math.nan
         t_right = math.nan
     else:
-        t_left = nanIfNegative((particle_radius + x_leftWall - x)/vx) #or (vx+eps)
+        t_left = nanIfNegative((particle_radius + x_leftWall - x)/vx)
         t_right = nanIfNegative((-particle_radius + x_rightWall - x)/vx)
-    if vy==0:
+    if vy == 0:
         t_top = math.nan
         t_bottom = math.nan
     else:
@@ -68,7 +70,6 @@ def detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y):
     part_i = np.array([i for a in range(4)])
     wall = np.array(['left', 'right', 'top', 'bottom'])
     dt = np.array([t_left, t_right, t_top, t_bottom])
-    
     times_pw = np.stack((part_i, wall, dt), axis=1)
     # We need to sort the list in order to return only the element 
     # with the lowest collision time. This approach is similar to the
