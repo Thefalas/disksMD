@@ -9,7 +9,7 @@ import numpy as np
 from measure import distance, relativeVelocity
 from tools import nanIfNegative, infIfNegative
 
-eps = 5000*np.finfo(float).eps # Machine epsilon
+#eps = 5000*np.finfo(float).eps # Machine epsilon
 
 def detectCollisionTime(i, j, pos, vel, particle_radius):
     """ Returns the time until the next collision between particles i, j """
@@ -24,7 +24,7 @@ def detectCollisionTime(i, j, pos, vel, particle_radius):
     d = 2*particle_radius
     
     inner_term = b*b - v2*(r2 - d*d)
-    if (inner_term<0 or v2==0):
+    if (inner_term<0 or v2==0 or i==j):
         t = 'inf'
     else:
         # The following formula has been taken from Eq: 14.2.2 in

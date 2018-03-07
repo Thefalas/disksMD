@@ -80,6 +80,7 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos, v
     times_pp = deleteInfs(times_pp) # Cleaning arrays of unnecessary entries
     return (times_pp, times_pw)
 
+
 def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, vel, times_pp, times_pw, i):
     # Particle-Wall collision, recalculates only entries involving part. i
     result = deleteEntries(times_pp, times_pw, i)
@@ -134,14 +135,17 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, pos, ve
         else:
             index = bisect.bisect(times_pp[:,2], float(new_entry[0,2]))
         times_pp = np.insert(times_pp, index, new_entry, axis=0)
-        
-    times_pw_float = np.array([float(a) for a in times_pw[:,2]])       
+             
     # Wall update
     new_entry = detectWallCollisionTime(i, pos, vel, particle_radius, size_X, size_Y)
     new_entry_j = detectWallCollisionTime(j, pos, vel, particle_radius, size_X, size_Y)
+    
+    times_pw_float = np.array([float(a) for a in times_pw[:,2]])  
     index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
-    index_j = bisect.bisect(times_pw_float, float(new_entry_j[0,2]))
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
+    
+    times_pw_float = np.array([float(a) for a in times_pw[:,2]])  
+    index_j = bisect.bisect(times_pw_float, float(new_entry_j[0,2]))
     times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
     
     return (times_pp, times_pw)

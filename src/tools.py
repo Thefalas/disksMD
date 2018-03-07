@@ -7,14 +7,16 @@ Created on Wed Feb 28 12:53:33 2018
 import math
 import numpy as np
 
+eps = 5000*np.finfo(float).eps
+
 def infIfNegative(t):
-    if t <= 0:
+    if t <= eps:
         return 'inf'
     else:
         return t
 
 def nanIfNegative(t):
-    if t <= 0:
+    if t <= eps:
         return math.nan
     else:
         return t
