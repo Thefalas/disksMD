@@ -12,11 +12,11 @@ from mainLoop import computeNextCollision
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 restitution_coef = 1.0 # TODO: This parameter is not working properly if !=1.0
 particle_radius = 1.0
-n_particles = 12 # TODO: Why 3 is the minimun number of particles?
-desired_collisions_per_particle = 100
+n_particles = 35 # TODO: Why 3 is the minimun number of particles?
+desired_collisions_per_particle = 50
 n_collisions = n_particles*desired_collisions_per_particle
 size_X = 20
-size_Y = 15
+size_Y = 20
 
 # Here begins the actual script
 # Random initialization of position and velocity arrays

@@ -7,7 +7,7 @@ set t wxt
 
 nt=1500
 LX=20
-LY=15
+LY=20
 
 set xrange[0:LX]
 set yrange[0:LY]
@@ -16,7 +16,7 @@ set size ratio LY/LX
 cd 'data'
 
 do for[count=0:nt]{
-    pause 0.05
+    pause 0.005
     frame = 'xy'.count
     if (count<1000) {frame='xy0'.count}
     if (count<100) {frame='xy00'.count}
