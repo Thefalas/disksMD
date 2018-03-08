@@ -5,7 +5,7 @@
 set t wxt
 #set t png
 
-nt=1500
+nt=2000
 LX=20
 LY=20
 
@@ -24,5 +24,6 @@ do for[count=0:nt]{
     archivo = frame.'.dat'
 #    image = frame.'.png'
 #    set o image
+#	set output count.'.png'
     plot archivo u 1:2:(1) w circles title archivo
 }

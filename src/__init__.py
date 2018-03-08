@@ -7,12 +7,13 @@ from initialization import initRandomPos, initRandomVel
 from tools import saveData
 from timeLists import createCollisionList, createWallCollisionList
 from mainLoop import computeNextCollision
+from statistics import velocityDistribution
 
 # Settings
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 restitution_coef = 1.0 # TODO: This parameter is not working properly if !=1.0
 particle_radius = 1.0
-n_particles = 35 # TODO: Why 3 is the minimun number of particles?
+n_particles = 40 # TODO: Why 3 is the minimun number of particles?
 desired_collisions_per_particle = 50
 n_collisions = n_particles*desired_collisions_per_particle
 size_X = 20
@@ -46,3 +47,6 @@ for c in range(n_collisions):
     print("Saving file for colission nº: "+str(c+1)+" / "+str(n_collisions))
 # End of the simulation
 print("Simulation finished, data can be found in: " + data_folder)
+
+# Now we print an histogram of the velocity distribution (in x and y direction)
+h = velocityDistribution(n_collisions, data_folder)

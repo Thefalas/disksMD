@@ -39,3 +39,8 @@ def saveData(col_number, data_folder, n_particles, pos, vel):
         for i in range(n_particles):
             file.write('{0:10.2f} {1:10.2f}\n'.format(vel[i,0], vel[i,1]))
     file.closed
+    
+def readData(col_number, data_folder):
+    file_name_vel = data_folder + "/vxvy"+'{0:04d}'.format(col_number)+".dat"
+    velocities = np.loadtxt(file_name_vel)
+    return velocities
