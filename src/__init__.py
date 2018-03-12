@@ -7,7 +7,7 @@ from initialization import initRandomPos, initRandomVel
 from tools import saveData
 from timeLists import createCollisionList, createWallCollisionList
 from mainLoop import computeNextCollision
-from statistics import velocityDistribution
+from statistics import velocityDistribution, computeKurtosis
 
 # Settings
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
@@ -46,7 +46,11 @@ for c in range(n_collisions):
     saveData(c, data_folder, n_particles, pos, vel)
     print("Saving file for colission nº: "+str(c+1)+" / "+str(n_collisions))
 # End of the simulation
-print("Simulation finished, data can be found in: " + data_folder)
+print("Simulation finished, data can be found at: " + data_folder)
 
 # Now we print an histogram of the velocity distribution (in x and y direction)
 h = velocityDistribution(n_collisions, data_folder)
+k = computeKurtosis(n_collisions, data_folder)
+print("Kurtosis (3 for a Maxwellian distribution)")
+print("Kurtosis for axis x is: ", "{:.2f}".format(k[0]))
+print("Kurtosis for axis y is: ", "{:.2f}".format(k[1]))

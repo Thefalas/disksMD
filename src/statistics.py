@@ -5,13 +5,13 @@ Created on Thu Mar  8 17:33:47 2018
 @author: malopez
 """
 import numpy as np
+from scipy.stats import kurtosis
 import matplotlib.pyplot as plt
 import seaborn
 from tools import readData
 
-def velocityDistribution(n_collisions, data_folder):
-    """ This function returns an histogram plot of the velocity distribution of
-        particles, the last 20% of total collisions are used for this """
+def getStationaryState(n_collisions, data_folder):
+    """ Here we read the last 20 % of the data and return those velocities """
     # First, we need to read the data from the simulation
     velocities = []
     for a in range(n_collisions):
@@ -25,7 +25,13 @@ def velocityDistribution(n_collisions, data_folder):
         current = velocities[(n_collisions-2)-a][:,:]
         tup = (vel, current)
         vel = np.vstack(tup)
-        
+    return vel
+
+def velocityDistribution(n_collisions, data_folder):
+    """ This function returns an histogram plot of the velocity distribution of
+        particles, the last 20% of total collisions are used for this """
+    # First, we need to read the data from the simulation
+    vel = getStationaryState(n_collisions, data_folder)       
 #    velX = vel[:,0]
 #    velY = vel[:,1] 
 #    h = np.histogram(vel)
@@ -38,3 +44,9 @@ def velocityDistribution(n_collisions, data_folder):
     # Another interesting visualization
 #    histPlot2D = plt.hist2d(vel[:,0], vel[:,1], bins=b)
     return histPlot
+
+def computeKurtosis(n_collisions, data_folder):
+    # First, we need to read the data from the simulation
+    vel = getStationaryState(n_collisions, data_folder)
+    k = kurtosis(vel, fisher=False)
+    return k
