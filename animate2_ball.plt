@@ -16,7 +16,7 @@ set size ratio LY/LX
 cd 'data'
 
 do for[count=0:nt]{
-    pause 0.005
+    pause 0.05
     frame = 'xy'.count
     if (count<1000) {frame='xy0'.count}
     if (count<100) {frame='xy00'.count}

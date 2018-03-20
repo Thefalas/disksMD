@@ -6,13 +6,16 @@ Created on Wed Feb 28 13:58:14 2018
 """
 import numpy as np
 
-def propagate(t, n_particles, pos, vel):
+def propagate(t, mu, pos, vel):
     """ Updates positions for all particles, lineal movement during 
         a time t (time until next collision)"""
+    pos = pos + vel*t #- (0.5*as2DArray(mu,vel[i])*t*t) # Including friction
 
-    for i in range(n_particles):
-        pos[i] = pos[i] + vel[i]*t
     return pos
+
+"""def frictionVelocityChange(t, n_particles, mu, vel):
+    vel = vel - as2DArray(mu, vel)*t
+    return vel"""
             
 def advanceTime(t, times_pp, times_pw):
     """ Advances all entries a time t (time since last collision) """
@@ -20,3 +23,8 @@ def advanceTime(t, times_pp, times_pw):
     times_pw[:,2] = np.array([float(a) for a in times_pw[:,2]]) - t
     
     return (times_pp, times_pw)
+
+def as2DArray(mu, array):
+    
+    result = np.sign(array)*np.array([mu, mu])
+    return result

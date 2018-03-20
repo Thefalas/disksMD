@@ -4,12 +4,13 @@ Created on Thu Mar  1 10:36:56 2018
 
 @author: malopez
 """
-from propagation import propagate, advanceTime
+from propagation import propagate, advanceTime #frictionVelocityChange
 from collision import particleCollision, wallCollision
 from timeLists import updateCollisionLists
 
-def computeNextCollision(n_particles, particle_radius, size_X, size_Y, 
-                         restitution_coef, pos, vel, times_pp, times_pw):
+def computeNextCollision(n_particles, particle_radius, mu, size_X, size_Y, 
+                         restitution_coef, pos, vel, times_pp, times_pw, 
+                         abs_time):
     """ Propagates particles until next collision and updates velocities 
         after it. Checks if next col. is particle-particle or particle-wall """
     #We take the first element (shortest time) of both lists
@@ -22,7 +23,8 @@ def computeNextCollision(n_particles, particle_radius, size_X, size_Y,
     # Particle-particle collision case
     if t_pp <= t_pw:
         # Propagates particles until current collision
-        pos = propagate(t_pp, n_particles, pos, vel)
+        pos = propagate(t_pp, mu, pos, vel)
+        """vel = frictionVelocityChange(t_pp, n_particles, mu, vel)"""
         # Advances time
         result = advanceTime(t_pp, times_pp, times_pw)
         times_pp = result[0]
@@ -38,10 +40,14 @@ def computeNextCollision(n_particles, particle_radius, size_X, size_Y,
                                         times_pw, i, j)
         times_pp = result[0]
         times_pw = result[1]
+        
+        abs_time += t_pp # We update the value for absolute time
     
     # Particle-wall collision case
     else:
-        pos = propagate(t_pw, n_particles, pos, vel)
+        pos = propagate(t_pw, mu, pos, vel)
+        """vel = frictionVelocityChange(t_pw, n_particles, mu, vel)"""
+        
         result = advanceTime(t_pw, times_pp, times_pw)
         times_pp = result[0]
         times_pw = result[1]
@@ -54,6 +60,8 @@ def computeNextCollision(n_particles, particle_radius, size_X, size_Y,
                                       times_pw, i, j='none')
         times_pp = result[0]
         times_pw = result[1]
+        
+        abs_time += t_pp
 
     # We return a tuple with the arrays that have changed in this collision
-    return (pos, vel, times_pp, times_pw)
+    return (pos, vel, times_pp, times_pw, abs_time)

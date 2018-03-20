@@ -11,7 +11,7 @@ import seaborn
 from tools import readData
 
 def getStationaryState(n_collisions, data_folder):
-    """ Here we read the last 20 % of the data and return those velocities """
+    """ Here we read the last 75 % of the data and return those velocities """
     # First, we need to read the data from the simulation
     velocities = []
     for a in range(n_collisions):
@@ -19,9 +19,9 @@ def getStationaryState(n_collisions, data_folder):
         velocities.append(result)
     
     # Taking the last 20% of collisions and saving them in an array
-    last20 = int(n_collisions/5)
+    last75 = int(75*n_collisions/100)
     vel = velocities[n_collisions-1][:,:]
-    for a in range(last20):
+    for a in range(last75):
         current = velocities[(n_collisions-2)-a][:,:]
         tup = (vel, current)
         vel = np.vstack(tup)
@@ -29,7 +29,7 @@ def getStationaryState(n_collisions, data_folder):
 
 def velocityDistribution(n_collisions, data_folder):
     """ This function returns an histogram plot of the velocity distribution of
-        particles, the last 20% of total collisions are used for this """
+        particles, the last 75% of total collisions are used for this """
     # First, we need to read the data from the simulation
     vel = getStationaryState(n_collisions, data_folder)       
 #    velX = vel[:,0]
