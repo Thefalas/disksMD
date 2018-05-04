@@ -26,20 +26,17 @@ def computeNextCollision(n_particles, particle_radius, mu, size_X, size_Y,
         pos = propagate(t_pp, mu, pos, vel)
         """vel = frictionVelocityChange(t_pp, n_particles, mu, vel)"""
         # Advances time
-        result = advanceTime(t_pp, times_pp, times_pw)
-        times_pp = result[0]
-        times_pw = result[1]
-        
+        times_pp, times_pw = advanceTime(t_pp, times_pp, times_pw)
+
         i = int(times_pp[0,0])
         j = int(times_pp[0,1])
         # Compute change in velocities due to collision
         vel = particleCollision(i, j, vel, pos, particle_radius)
         # And finally, updates the collision time lists with new entries
-        result = updateCollisionLists(t_pp, n_particles, particle_radius, 
-                                        size_X, size_Y, pos, vel, times_pp, 
-                                        times_pw, i, j)
-        times_pp = result[0]
-        times_pw = result[1]
+        times_pp, times_pw = updateCollisionLists(t_pp, n_particles, 
+                                                  particle_radius, size_X, 
+                                                  size_Y, pos, vel, times_pp, 
+                                                  times_pw, i, j)
         
         abs_time += t_pp # We update the value for absolute time
     
@@ -48,20 +45,16 @@ def computeNextCollision(n_particles, particle_radius, mu, size_X, size_Y,
         pos = propagate(t_pw, mu, pos, vel)
         """vel = frictionVelocityChange(t_pw, n_particles, mu, vel)"""
         
-        result = advanceTime(t_pw, times_pp, times_pw)
-        times_pp = result[0]
-        times_pw = result[1]
+        times_pp, times_pw = advanceTime(t_pw, times_pp, times_pw)
         
         i = int(times_pw[0,0])
         wall = str(times_pw[0,1])
         vel = wallCollision(i, wall, vel, restitution_coef)
-        result = updateCollisionLists(t_pw, n_particles, particle_radius, 
+        times_pp, times_pw = updateCollisionLists(t_pw, n_particles, particle_radius, 
                                       size_X, size_Y, pos, vel, times_pp, 
                                       times_pw, i, j='none')
-        times_pp = result[0]
-        times_pw = result[1]
         
         abs_time += t_pp
 
     # We return a tuple with the arrays that have changed in this collision
-    return (pos, vel, times_pp, times_pw, abs_time)
+    return pos, vel, times_pp, times_pw, abs_time

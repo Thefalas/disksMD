@@ -22,7 +22,7 @@ def advanceTime(t, times_pp, times_pw):
     times_pp[:,2] = times_pp[:,2] - t
     times_pw[:,2] = np.array([float(a) for a in times_pw[:,2]]) - t
     
-    return (times_pp, times_pw)
+    return times_pp, times_pw
 
 def as2DArray(mu, array):
     

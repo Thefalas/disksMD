@@ -6,8 +6,8 @@ set t wxt
 #set t png
 
 nt=2000
-LX=20
-LY=20
+LX=30
+LY=30
 
 set xrange[0:LX]
 set yrange[0:LY]

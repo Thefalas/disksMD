@@ -7,6 +7,8 @@ Created on Wed Feb 28 18:46:23 2018
 import math
 import bisect
 import numpy as np
+from mpi4py import MPI
+#import pandas as pd
 from colTimes import detectWallCollisionTime, detectCollisionTime
 
 def createWallCollisionList(n_particles, particle_radius, size_X, size_Y, 
@@ -15,18 +17,46 @@ def createWallCollisionList(n_particles, particle_radius, size_X, size_Y,
         for all particle-wall events """
     # Initialize two arrays for storing particle-particle and particle-wall
     # collision times; apart from time t, they save the indexes of interacting
-    # particles and/or the name of interacting wall.
-    part_i = np.array([0 for i in range(n_particles)])
-    dt = np.array([0.0 for i in range(n_particles)])
-    wall = np.array(['test' for i in range(n_particles)])
+    # particles and/or the name of interacting wall.    
+    part_i = np.zeros((n_particles, ), dtype=np.int32)
+    dt = np.zeros((n_particles, ), dtype=np.float64)
+    wall = np.full((n_particles,), 'testwall')
     times_pw = np.stack((part_i, wall, dt), axis=1)
+    
+    #part_i = pd.DataFrame(np.zeros((n_particles, ), dtype=np.int32), columns=('i',))
+    #dt = pd.DataFrame(np.zeros((n_particles, ), dtype=np.float64), columns=('dt',))
+    #wall = pd.DataFrame(np.full((n_particles,), 'testwall'), columns=('wall',))
+    #times_pw = pd.concat((part_i, wall, dt), axis=1)
+    
+    comm = MPI.COMM_WORLD
+    comm_size = comm.Get_size() # Gives number of ranks in comm
+    rank = comm.Get_rank()
+    
+    iterablePerCore = int(n_particles/comm_size)
+    try:
+        if rank == 0:
+            iterable = np.arange(n_particles)
+        
+        recvbuf = np.empty(iterablePerCore, dtype=int)  # allocate space for recvbuf
+        comm.Scatter(iterable, recvbuf, root=0)
+        
+        for a in recvbuf:
+            times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
+                                                  size_X, size_Y)
+            
+        if rank == 0:
+            times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
+            return times_pw
+    except:
+        print('WARNING: Wrong number of cores for MPI, must be between 1 and ',
+              n_particles,'. It also must be a divisor of ', n_particles)
 
-    for a in range(n_particles):
-        times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
-                                              size_X, size_Y)
-    # Sorting the array for the initialization of the list
-    times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
-    return times_pw
+        for a in range(n_particles):
+            times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
+                                                  size_X, size_Y)
+        # Sorting the array for the initialization of the list
+        times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
+        return times_pw
 
 def createCollisionList(n_particles, particle_radius, pos, vel):
     """ Creates an ordered list times_pw with collision times 
@@ -36,9 +66,9 @@ def createCollisionList(n_particles, particle_radius, pos, vel):
     # This is without repetition (we don't save (3,7) and (7,3); or (5,5) i.e).
     # http://mathworld.wolfram.com/Permutation.html
     n = int(math.factorial(n_particles)/(2*math.factorial(n_particles-2)))
-    part_i = np.array([0 for i in range(n)])
-    part_j = np.array([0 for i in range(n)])
-    dt = np.array([0.0 for i in range(n)])
+    part_i = np.zeros((n, ), dtype=np.int32)
+    part_j = np.zeros((n, ), dtype=np.int32)
+    dt = np.zeros((n, ), dtype=np.float64)
     times_pp = np.stack((part_i, part_j, dt), axis=1)
 
     a = 0
@@ -71,18 +101,15 @@ def updateCollisionLists(t, n_particles, particle_radius, size_X, size_Y, pos,
     i = int(i)
     
     if j=='none':
-        result = wallCollisionUpdate(t, n_particles, particle_radius, size_X, 
+        times_pp, times_pw = wallCollisionUpdate(t, n_particles, particle_radius, size_X, 
                                      size_Y, pos, vel, times_pp, times_pw, i)
-        times_pp = result[0]
-        times_pw = result[1]
+
     else:
-        result = partCollisionUpdate(t, n_particles, particle_radius, size_X, 
+        times_pp, times_pw = partCollisionUpdate(t, n_particles, particle_radius, size_X, 
                                      size_Y, pos, vel, times_pp, times_pw, i, j)
-        times_pp = result[0]
-        times_pw = result[1]
     
     # We return the updated lists as a tuple
-    return (times_pp, times_pw)
+    return times_pp, times_pw
 
 
 def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, 
@@ -115,7 +142,7 @@ def wallCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y,
     index = bisect.bisect(times_pw_float, float(new_entry[0,2]))
     times_pw = np.insert(times_pw, index, new_entry, axis=0)
     
-    return (times_pp, times_pw)
+    return times_pp, times_pw
 
 def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y, 
                         pos, vel, times_pp, times_pw, i, j):
@@ -160,4 +187,4 @@ def partCollisionUpdate(t, n_particles, particle_radius, size_X, size_Y,
     index_j = bisect.bisect(times_pw_float, float(new_entry_j[0,2]))
     times_pw = np.insert(times_pw, index_j, new_entry_j, axis=0)
     
-    return (times_pp, times_pw)
+    return times_pp, times_pw
