@@ -4,7 +4,6 @@ Created on Thu May  3 18:33:28 2018
 
 @author: malopez
 """
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
@@ -34,7 +33,7 @@ for i in range(n_collisions):
     plt.close()
   
 images = []
-output = './video.mp4'
+output = './video2.mp4'
 for i in range(n_collisions):
     images.append(images_folder+'/img'+'{0:04d}'.format(i)+".png")
 
@@ -49,8 +48,8 @@ out = cv2.VideoWriter(output, fourcc, 30.0, (width, height))
 for image in images:
 
     frame = cv2.imread(image)
-
-    out.write(frame) # Write out frame to video
+    # Write out frame to video
+    out.write(frame) 
 
 # Release everything if job is finished
 out.release()

@@ -7,7 +7,6 @@ Created on Wed Feb 28 18:46:23 2018
 import math
 import bisect
 import numpy as np
-from mpi4py import MPI
 #import pandas as pd
 from colTimes import detectWallCollisionTime, detectCollisionTime
 
@@ -27,36 +26,14 @@ def createWallCollisionList(n_particles, particle_radius, size_X, size_Y,
     #dt = pd.DataFrame(np.zeros((n_particles, ), dtype=np.float64), columns=('dt',))
     #wall = pd.DataFrame(np.full((n_particles,), 'testwall'), columns=('wall',))
     #times_pw = pd.concat((part_i, wall, dt), axis=1)
-    
-    comm = MPI.COMM_WORLD
-    comm_size = comm.Get_size() # Gives number of ranks in comm
-    rank = comm.Get_rank()
-    
-    iterablePerCore = int(n_particles/comm_size)
-    try:
-        if rank == 0:
-            iterable = np.arange(n_particles)
-        
-        recvbuf = np.empty(iterablePerCore, dtype=int)  # allocate space for recvbuf
-        comm.Scatter(iterable, recvbuf, root=0)
-        
-        for a in recvbuf:
-            times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
-                                                  size_X, size_Y)
-            
-        if rank == 0:
-            times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
-            return times_pw
-    except:
-        print('WARNING: Wrong number of cores for MPI, must be between 1 and ',
-              n_particles,'. It also must be a divisor of ', n_particles)
 
-        for a in range(n_particles):
-            times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
+
+    for a in range(n_particles):
+        times_pw[a] = detectWallCollisionTime(a, pos, vel, particle_radius, 
                                                   size_X, size_Y)
-        # Sorting the array for the initialization of the list
-        times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
-        return times_pw
+    # Sorting the array for the initialization of the list
+    times_pw = times_pw[np.array([float(a) for a in times_pw[:,2]]).argsort()]
+    return times_pw
 
 def createCollisionList(n_particles, particle_radius, pos, vel):
     """ Creates an ordered list times_pw with collision times 

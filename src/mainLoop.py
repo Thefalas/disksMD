@@ -13,7 +13,7 @@ def computeNextCollision(n_particles, particle_radius, mu, size_X, size_Y,
                          abs_time):
     """ Propagates particles until next collision and updates velocities 
         after it. Checks if next col. is particle-particle or particle-wall """
-    #We take the first element (shortest time) of both lists
+    # We take the first element (shortest time) of both lists
     t_pp = float(times_pp[0,2])
     t_pw = float(times_pw[0,2])
     # Check if particle-particle or particle-wall collision (or both).
