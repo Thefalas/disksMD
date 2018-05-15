@@ -18,7 +18,7 @@ class KickGenerator():
         timeInterval = globalTime - self.t_lastKick
         # The intensity of current kick is proportional to that time.
         # I.e: The longer since last kick the more intense this will be
-        kickIntensity = self.baseKickIntensity + timeInterval
+        kickIntensity = self.baseKickIntensity * timeInterval
         # We apply the kick to the particles (normal distribution)
         # Intensity means std. dev. of the distribution
         vel = vel + np.random.normal(0, kickIntensity, vel.shape)

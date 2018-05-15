@@ -24,7 +24,7 @@ size_X = 30 # System size X
 size_Y = 30 # System size Y
 abs_time = 0.0 # Just to keep record of absolute time
 
-baseKickIntensity = 2 #Escalado poorr el dt de la siguiente colision
+baseKickIntensity = 400 #Escalado poorr el dt de la siguiente colision
 
 
 # ---- Here begins the actual script ----
