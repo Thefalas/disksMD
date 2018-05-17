@@ -39,8 +39,9 @@ def velocityDistribution(n_collisions, data_folder):
     seaborn.set_style('whitegrid')
     seaborn.kdeplot(vel[:,0], bw=0.5)
     # With former array vel we can plot two histograms (for x and y directions)
-    b = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9]
-    histPlot = plt.hist(vel, density=True, bins=b)
+    #b = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9]
+    #histPlot = plt.hist(vel, density=True, bins=b)
+    histPlot = plt.hist(vel, density=True)
     # Another interesting visualization
 #    histPlot2D = plt.hist2d(vel[:,0], vel[:,1], bins=b)
     return histPlot

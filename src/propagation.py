@@ -6,7 +6,7 @@ Created on Wed Feb 28 13:58:14 2018
 """
 import numpy as np
 
-def propagate(t, mu, pos, vel):
+def propagate(t, pos, vel):
     """ Updates positions for all particles, lineal movement during 
         a time t (time until next collision)"""
     pos = pos + vel*t #- (0.5*as2DArray(mu,vel[i])*t*t) # Including friction
