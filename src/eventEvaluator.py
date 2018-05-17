@@ -8,8 +8,9 @@ import numpy as np
 from measure import distance, relativeVelocity
 
 class EventEvaluator():
-    def __init__(self, restitution_coef):
+    def __init__(self, restitution_coef, particle_radius):
         self.restitution_coef = restitution_coef
+        self.particle_radius = particle_radius
         
         
     def selectFirstEvent(self, eventTimesList):
@@ -33,7 +34,7 @@ class EventEvaluator():
             vel = wallCollision(event.first_element, event.second_element, vel, self.restitution_coef)
             # vel = wallCollision(event['first_element'], event['second_element'], vel, self.restitution_coef)
         elif event.eventType == 'particleParticle_collision':
-            vel = particleCollision(event.first_element, event.second_element, vel, pos, self.restitution_coef)
+            vel = particleCollision(event.first_element, event.second_element, vel, pos, self.particle_radius, self.restitution_coef)
             #vel = wallCollision(event['first_element'], event['second_element'], vel, pos, self.restitution_coef)
             
         return vel
@@ -50,7 +51,7 @@ def wallCollision(i, wall, vel, restitution_coef):
         vel[i,1] = -restitution_coef * vel[i,1] # y component changes direction
     return vel
 
-def particleCollision(i, j, vel, pos, particle_radius):
+def particleCollision(i, j, vel, pos, particle_radius, restitution_coef):
     i = int(i)
     j = int(j)
     
@@ -61,6 +62,6 @@ def particleCollision(i, j, vel, pos, particle_radius):
     # 'The Art of Molecular Dynamics Simulations', D. Rapaport.
     delta_v = (-b/(4*particle_radius*particle_radius))*r
     # TODO: a mass parameter would be useful when expanding functionality
-    vel[i] = vel[i] + delta_v 
-    vel[j] = vel[j] - delta_v    
+    vel[i] = restitution_coef*(vel[i] + delta_v)
+    vel[j] = restitution_coef*(vel[j] - delta_v)    
     return vel

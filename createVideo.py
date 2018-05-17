@@ -10,6 +10,7 @@ import cv2
 
 images_folder = "C:/Users/malopez/Desktop/disksMD/images"
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
+output_video = './video3.mp4'
 particle_radius = 1.0
 n_particles = 50 # TODO: Why 3 is the minimun number of particles?
 desired_collisions_per_particle = 10
@@ -33,7 +34,7 @@ for i in range(n_collisions):
     plt.close()
   
 images = []
-output = './video2.mp4'
+
 for i in range(n_collisions):
     images.append(images_folder+'/img'+'{0:04d}'.format(i)+".png")
 
@@ -43,7 +44,7 @@ height, width, channels = frame.shape
 
 # Definimos el codec y creamos un objeto VideoWriter
 fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use lower case
-out = cv2.VideoWriter(output, fourcc, 30.0, (width, height))
+out = cv2.VideoWriter(output_video, fourcc, 30.0, (width, height))
 
 for image in images:
 
@@ -54,4 +55,4 @@ for image in images:
 # Release everything if job is finished
 out.release()
 
-print("The output video is {}".format(output))
+print("The output video is {}".format(output_video))

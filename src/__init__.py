@@ -16,7 +16,7 @@ from propagation import propagate
 # ------ Settings ------
 
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
-restitution_coef = 1.0 # TODO: This parameter is not working properly if !=1.0
+restitution_coef = 0.75 # TODO: This parameter is not working properly if !=1.0
 particle_radius = 1.0
 n_particles = 50 # TODO: Why 3 is the minimun number of particles?
 desired_collisions_per_particle = 10
@@ -45,7 +45,7 @@ events.updateEventList(pos, vel)
 kickGen = KickGenerator(n_particles, baseKickIntensity)
 
 # Initialization of the Event Evaluator
-evEval = EventEvaluator(restitution_coef)
+evEval = EventEvaluator(restitution_coef, particle_radius)
         
 # We call the main loop for every collision
 for c in range(n_collisions):
@@ -62,7 +62,7 @@ for c in range(n_collisions):
     # that event
     vel = evEval.evaluateEvent(nextEvent, vel, pos)
     # When all this has finished we need to delete and recalculate the
-    # event list (update it)
+    # event list (update it)    
     events.updateEventList(pos, vel)
   
     # Finally, we need to apply the random force (this part is optional)
