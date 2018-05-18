@@ -9,12 +9,13 @@ from measure import distance, relativeVelocity
 from tools import infIfNegative
     
 class CollisionDetector():
-    def __init__(self, pos, vel, particle_radius, size_X, size_Y):
+    def __init__(self, meas, pos, vel, particle_radius, size_X, size_Y):
         self.pos = pos
         self.vel = vel
         self.particle_radius = particle_radius
         self.size_X = size_X
         self.size_Y = size_Y
+        self.measure = meas # Measuring class object
         
         # To be able to apply the 'computeCollisionTime' function to a Dataframe,
         # we need to first vectorize the function 'computeCollisionTime', as in:
@@ -69,9 +70,11 @@ class CollisionDetector():
     def particleCollisionTime(self, first_element, second_element):
         """ Returns the time until the next collision between particles i, j """
         # Quantities required in following formula
-        r = distance(first_element, second_element, self.pos)
+        #r = distance(first_element, second_element, self.pos)
+        r = self.measure.distance(first_element, second_element)
         r2 = np.dot(r, r)
-        v = relativeVelocity(first_element, second_element, self.vel)
+        #v = relativeVelocity(first_element, second_element, self.vel)
+        v = self.measure.relativeVelocity(first_element, second_element)
         v2 = np.dot(v, v)
         b = np.dot(r, v)
         d = 2*self.particle_radius

@@ -8,6 +8,7 @@ import math
 import numpy as np
 import pandas as pd
 from collisionTimes import CollisionDetector
+from measure import MeasureClass
 
 n_particles = 50
 
@@ -92,8 +93,12 @@ class EventList():
  
        
     def fillList(self, times, pos, vel):
+        # TODO: We create an instance of measure class, to measure distances
+        # and rel. velocities so that collision times can be calculated
+        meas = MeasureClass(pos, vel)
         # We create an instance of 'CollisionDetector'
-        colDetector = CollisionDetector(pos, vel, self.particle_radius, self.size_X, self.size_Y)
+        #colDetector = CollisionDetector(pos, vel, self.particle_radius, self.size_X, self.size_Y)
+        colDetector = CollisionDetector(meas, pos, vel, self.particle_radius, self.size_X, self.size_Y)
         # Given any pair of elements, compute collision times between them
         # Computing time is minimized following the advice in:
         # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6

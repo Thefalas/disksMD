@@ -20,11 +20,11 @@ size_Y = 30 # System size Y
 
 
 for i in range(n_collisions):
-    file_name_pos = data_folder + "/xy"+'{0:04d}'.format(i)+".dat"
+    file_name_pos = data_folder + "/xy"+'{0:05d}'.format(i)+".dat"
     pos = pd.read_table(file_name_pos, sep='\s+', 
                         header = None, names =['x', 'y'])
     
-    img_name = images_folder+'/img'+'{0:04d}'.format(i)+".png"
+    img_name = images_folder+'/img'+'{0:05d}'.format(i)+".png"
     fig, ax = plt.subplots(figsize=(6, 6), dpi=300)
     ax.set_xlim([0,30])
     ax.set_ylim([0,30])
@@ -36,7 +36,7 @@ for i in range(n_collisions):
 images = []
 
 for i in range(n_collisions):
-    images.append(images_folder+'/img'+'{0:04d}'.format(i)+".png")
+    images.append(images_folder+'/img'+'{0:05d}'.format(i)+".png")
 
 # Height and Width from first image
 frame = cv2.imread(images[0])
