@@ -10,7 +10,7 @@ import cv2
 
 images_folder = "C:/Users/malopez/Desktop/disksMD/images"
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
-output_video = './video3.mp4'
+output_video = './video4.mp4'
 particle_radius = 1.0
 n_particles = 50 # TODO: Why 3 is the minimun number of particles?
 desired_collisions_per_particle = 10

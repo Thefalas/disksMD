@@ -42,8 +42,8 @@ class EventEvaluator():
     
     
 def wallCollision(i, wall, vel, restitution_coef):
-    i = int(i)
-    wall = str(wall)
+    #i = int(i)
+    #wall = str(wall)
 
     if (wall=='leftWall' or wall=='rightWall'):
         vel[i,0] = -restitution_coef * vel[i,0] # x component changes direction
@@ -52,8 +52,8 @@ def wallCollision(i, wall, vel, restitution_coef):
     return vel
 
 def particleCollision(i, j, vel, pos, particle_radius, restitution_coef):
-    i = int(i)
-    j = int(j)
+    #i = int(i)
+    #j = int(j)
     
     r = distance(i, j, pos)
     v = relativeVelocity(i, j, vel)

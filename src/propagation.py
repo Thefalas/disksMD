@@ -9,7 +9,11 @@ import numpy as np
 def propagate(t, pos, vel):
     """ Updates positions for all particles, lineal movement during 
         a time t (time until next collision)"""
-    pos = pos + vel*t #- (0.5*as2DArray(mu,vel[i])*t*t) # Including friction
+        
+    if str(t)=='inf':
+        print('---------------Warning! (inf value is first element)---------------')
+    else:
+        pos = pos + vel*t #- (0.5*as2DArray(mu,vel[i])*t*t) # Including friction
 
     return pos
 

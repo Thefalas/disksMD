@@ -5,17 +5,16 @@ Created on Wed May 16 18:52:50 2018
 @author: malopez
 """
 import numpy as np
-from measure import distance, relativeVelocity
 from tools import infIfNegative
     
 class CollisionDetector():
-    def __init__(self, meas, pos, vel, particle_radius, size_X, size_Y):
+    def __init__(self, measureObject, pos, vel, particle_radius, size_X, size_Y):
         self.pos = pos
         self.vel = vel
         self.particle_radius = particle_radius
         self.size_X = size_X
         self.size_Y = size_Y
-        self.measure = meas # Measuring class object
+        self.measure = measureObject # Measuring class object, to be able to compute distances
         
         # To be able to apply the 'computeCollisionTime' function to a Dataframe,
         # we need to first vectorize the function 'computeCollisionTime', as in:
@@ -44,7 +43,7 @@ class CollisionDetector():
             if vx==0:
                 t = 'inf'
             else:
-                x_leftWall = 0.0
+                x_leftWall = 0
                 t = infIfNegative((self.particle_radius + x_leftWall - x)/vx)
         elif second_element == 'rightWall':
             if vx==0:
@@ -62,7 +61,7 @@ class CollisionDetector():
             if vy==0:
                 t = 'inf'
             else:
-                y_bottomWall = 0.0
+                y_bottomWall = 0
                 t = infIfNegative((self.particle_radius + y_bottomWall - y)/vy)
         return t
            

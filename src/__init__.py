@@ -25,7 +25,8 @@ size_X = 30 # System size X
 size_Y = 30 # System size Y
 abs_time = 0.0 # Just to keep record of absolute time
 
-baseKickIntensity = 750 # Posteriormente escalado por el dt de la siguiente colision
+baseKickIntensity = 850 # Posteriormente escalado por el dt de la siguiente colision
+kick = False
 
 
 # ------ Here begins the actual script ------
@@ -54,6 +55,7 @@ for c in range(n_collisions):
     # is going to take place that next collision
     nextEvent = evEval.selectFirstEvent(events.eventTimesList)
     dt = evEval.getEventTime(nextEvent)
+
     # With this dt we can update the global time count, just to keep track of it
     abs_time += dt
     # Then we propagate particles (change positions) until that event
@@ -64,11 +66,12 @@ for c in range(n_collisions):
     # When all this has finished we need to delete and recalculate the
     # event list (update it)    
     events.updateEventList(pos, vel)
-  
-    # Finally, we need to apply the random force (this part is optional)
-    # Kicks and update collision times, since they must have changed
-    vel = kickGen.randomKick(vel, abs_time)
-    events.updateEventList(pos, vel)
+    
+    if kick == True:
+        # Finally, we need to apply the random force (this part is optional)
+        # Kicks and update collision times, since they must have changed
+        vel = kickGen.randomKick(vel, abs_time)
+        events.updateEventList(pos, vel)
 
 
     print('Contador de tiempo absoluto: ', str(abs_time))

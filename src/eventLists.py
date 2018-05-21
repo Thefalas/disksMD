@@ -94,11 +94,12 @@ class EventList():
        
     def fillList(self, times, pos, vel):
         # TODO: We create an instance of measure class, to measure distances
-        # and rel. velocities so that collision times can be calculated
-        meas = MeasureClass(pos, vel)
+        # and rel. velocities so that collision times can be calculated.
+        # This is done this way to avoid passing pos and vel arrays many times
+        measureObject = MeasureClass(pos, vel)
         # We create an instance of 'CollisionDetector'
         #colDetector = CollisionDetector(pos, vel, self.particle_radius, self.size_X, self.size_Y)
-        colDetector = CollisionDetector(meas, pos, vel, self.particle_radius, self.size_X, self.size_Y)
+        colDetector = CollisionDetector(measureObject, pos, vel, self.particle_radius, self.size_X, self.size_Y)
         # Given any pair of elements, compute collision times between them
         # Computing time is minimized following the advice in:
         # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6
@@ -111,6 +112,11 @@ class EventList():
     
     def orderList(self, times):
         # Sort the DataFrame by 'dt', ascendig order
+        
+        # Without the next line, ordering doesn't work properly, it confuses
+        # the type of dt column, considering it a string and not sorting right
+        times['dt'] = times['dt'].astype('float64') 
+        
         times = times.sort_values('dt')
         return times
     
