@@ -15,16 +15,16 @@ class KickGenerator():
         
     def randomKick(self, vel, globalTime):
         # First, we calculate the time that has passed since last collision/kick
-        timeInterval = globalTime - self.t_lastKick
+        self.timeInterval = globalTime - self.t_lastKick
         # The intensity of current kick is proportional to that time.
         # I.e: The longer since last kick the more intense this will be
-        kickIntensity = self.baseKickIntensity * timeInterval
+        self.kickIntensity = self.baseKickIntensity * self.timeInterval
         # We apply the kick to the particles (normal distribution)
         # Intensity means std. dev. of the distribution
-        vel = vel + np.random.normal(0, kickIntensity, vel.shape)
+        vel = vel + np.random.normal(0, self.kickIntensity, vel.shape)
         # Updating the attribute for next call
         self.t_lastKick = globalTime
-        print('Kick! - Time since last one: ', timeInterval, ' - Intensity: ', kickIntensity)
+
         
         return vel
         

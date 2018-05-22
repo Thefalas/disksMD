@@ -18,6 +18,9 @@ n_collisions = n_particles*desired_collisions_per_particle
 size_X = 30 # System size X
 size_Y = 30 # System size Y
 
+# Fenomenological constant ;p
+circle_size = particle_radius*427500 / (size_X*size_Y)
+
 
 for i in range(n_collisions):
     file_name_pos = data_folder + "/xy"+'{0:05d}'.format(i)+".dat"
@@ -26,9 +29,9 @@ for i in range(n_collisions):
     
     img_name = images_folder+'/img'+'{0:05d}'.format(i)+".png"
     fig, ax = plt.subplots(figsize=(6, 6), dpi=300)
-    ax.set_xlim([0,30])
-    ax.set_ylim([0,30])
-    plt.scatter(pos.x, pos.y, s=475)
+    ax.set_xlim([0,size_X])
+    ax.set_ylim([0,size_Y])
+    plt.scatter(pos.x, pos.y, s=circle_size)
     fig.savefig(img_name)
     print('Saving img nº: '+str(i))
     plt.close()

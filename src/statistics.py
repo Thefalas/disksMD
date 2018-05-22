@@ -19,7 +19,7 @@ def getStationaryState(n_collisions, data_folder):
         velocities.append(result)
     
     # Taking the last 20% of collisions and saving them in an array
-    last75 = int(75*n_collisions/100)
+    last75 = int(25*n_collisions/100)
     vel = velocities[n_collisions-1][:,:]
     for a in range(last75):
         current = velocities[(n_collisions-2)-a][:,:]
@@ -38,6 +38,7 @@ def velocityDistribution(n_collisions, data_folder):
 #    h2 = np.hstack(h)
     seaborn.set_style('whitegrid')
     seaborn.kdeplot(vel[:,0], bw=0.5)
+    #seaborn.kdeplot(vel[:,0]+vel[:,1], bw=0.5)
     # With former array vel we can plot two histograms (for x and y directions)
     #b = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9]
     #histPlot = plt.hist(vel, density=True, bins=b)
