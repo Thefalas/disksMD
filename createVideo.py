@@ -12,11 +12,11 @@ images_folder = "C:/Users/malopez/Desktop/disksMD/images"
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 output_video = './video4.mp4'
 particle_radius = 1.0
-n_particles = 50 # TODO: Why 3 is the minimun number of particles?
-desired_collisions_per_particle = 10
+n_particles = 300 # TODO: Why 3 is the minimun number of particles?
+desired_collisions_per_particle = 15
 n_collisions = n_particles*desired_collisions_per_particle
-size_X = 30 # System size X
-size_Y = 30 # System size Y
+size_X = 100 # System size X
+size_Y = 100 # System size Y
 
 # Fenomenological constant ;p
 circle_size = particle_radius*427500 / (size_X*size_Y)
@@ -28,7 +28,7 @@ for i in range(n_collisions):
                         header = None, names =['x', 'y'])
     
     img_name = images_folder+'/img'+'{0:05d}'.format(i)+".png"
-    fig, ax = plt.subplots(figsize=(6, 6), dpi=300)
+    fig, ax = plt.subplots(figsize=(6, 6), dpi=250)
     ax.set_xlim([0,size_X])
     ax.set_ylim([0,size_Y])
     plt.scatter(pos.x, pos.y, s=circle_size)
@@ -49,6 +49,7 @@ height, width, channels = frame.shape
 fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use lower case
 out = cv2.VideoWriter(output_video, fourcc, 30.0, (width, height))
 
+print('Generating video, please wait')
 for image in images:
 
     frame = cv2.imread(image)

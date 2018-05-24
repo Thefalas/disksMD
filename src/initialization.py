@@ -9,12 +9,13 @@ from measure import distanceModulus
 
 class RandomGenerator():
 
-    def __init__(self, particle_radius, n_particles, size_X, size_Y):
+    def __init__(self, particle_radius, n_particles, size_X, size_Y, baseStateVelocity):
         
         self.particle_radius = particle_radius
         self.n_particles = n_particles
         self.size_X = size_X
         self.size_Y = size_Y
+        self.baseStateVelocity = baseStateVelocity
 
     def initRandomPos(self):
         """ Initializes particle positions and velocities, makes sure that
@@ -52,6 +53,6 @@ class RandomGenerator():
             no particles overlap """  
         
         # Initialize particle velocities as a 2D numpy array (normal/gaussian).
-        vel = np.random.normal(0, 3, (self.n_particles, 2))
+        vel = np.random.normal(0, self.baseStateVelocity, (self.n_particles, 2))
 
         return vel

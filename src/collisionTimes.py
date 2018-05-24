@@ -8,13 +8,15 @@ import numpy as np
 from tools import infIfNegative
     
 class CollisionDetector():
-    def __init__(self, measureObject, pos, vel, particle_radius, size_X, size_Y):
+    def __init__(self, measureObject, pos, vel, particle_radius, size_X, size_Y, periodicWalls, periodicSideWalls):
         self.pos = pos
         self.vel = vel
         self.particle_radius = particle_radius
         self.size_X = size_X
         self.size_Y = size_Y
         self.measure = measureObject # Measuring class object, to be able to compute distances
+        self.periodicWalls = periodicWalls
+        self.periodicSideWalls = periodicSideWalls
         
         # To be able to apply the 'computeCollisionTime' function to a Dataframe,
         # we need to first vectorize the function 'computeCollisionTime', as in:
@@ -39,30 +41,33 @@ class CollisionDetector():
         vx = self.vel[first_element, 0]
         vy = self.vel[first_element, 1]
         
+        # Calculate collision times with walls
+
         if second_element == 'leftWall':
-            if vx==0:
-                t = 'inf'
+            if vx>=0:
+                 t = 'inf'
             else:
                 x_leftWall = 0
                 t = infIfNegative((self.particle_radius + x_leftWall - x)/vx)
         elif second_element == 'rightWall':
-            if vx==0:
+            if vx<=0:
                 t = 'inf'
             else:
                 x_rightWall = self.size_X
                 t = infIfNegative((-self.particle_radius + x_rightWall - x)/vx)
         elif second_element == 'topWall':
-            if vy==0:
+            if vy<=0:
                 t = 'inf'
             else:
                 y_topWall = self.size_Y
                 t = infIfNegative((-self.particle_radius + y_topWall - y)/vy)
         elif second_element == 'bottomWall':
-            if vy==0:
+            if vy>=0:
                 t = 'inf'
             else:
                 y_bottomWall = 0
-                t = infIfNegative((self.particle_radius + y_bottomWall - y)/vy)
+                t = infIfNegative((self.particle_radius + y_bottomWall - y)/vy)       
+        
         return t
            
 

@@ -13,11 +13,13 @@ from measure import MeasureClass
 n_particles = 50
 
 class EventList():    
-    def __init__(self, n_particles, particle_radius, size_X, size_Y):
+    def __init__(self, n_particles, particle_radius, size_X, size_Y, periodicWalls, periodicSideWalls):
         self.n_particles = n_particles
         self.particle_radius = particle_radius
         self.size_X = size_X
         self.size_Y = size_Y
+        self.periodicWalls = periodicWalls
+        self.periodicSideWalls = periodicSideWalls
         
         # We  will init this attribute (the event times list itself) outside 
         # the class definition, by calling the 'updateEventList' function
@@ -99,7 +101,8 @@ class EventList():
         measureObject = MeasureClass(pos, vel)
         # We create an instance of 'CollisionDetector'
         #colDetector = CollisionDetector(pos, vel, self.particle_radius, self.size_X, self.size_Y)
-        colDetector = CollisionDetector(measureObject, pos, vel, self.particle_radius, self.size_X, self.size_Y)
+        colDetector = CollisionDetector(measureObject, pos, vel, self.particle_radius, 
+                                        self.size_X, self.size_Y, self.periodicWalls, self.periodicSideWalls)
         # Given any pair of elements, compute collision times between them
         # Computing time is minimized following the advice in:
         # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6

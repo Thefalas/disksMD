@@ -4,6 +4,7 @@ Created on Thu Mar  8 17:33:47 2018
 
 @author: malopez
 """
+import math
 import numpy as np
 from scipy.stats import kurtosis
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ def getStationaryState(n_collisions, data_folder):
         velocities.append(result)
     
     # Taking the last 20% of collisions and saving them in an array
-    last75 = int(25*n_collisions/100)
+    last75 = int(75*n_collisions/100)
     vel = velocities[n_collisions-1][:,:]
     for a in range(last75):
         current = velocities[(n_collisions-2)-a][:,:]
@@ -52,3 +53,17 @@ def computeKurtosis(n_collisions, data_folder):
     vel = getStationaryState(n_collisions, data_folder)
     k = kurtosis(vel, fisher=False)
     return k
+
+def computeKurtosisCustom(vel):
+    v2_sep = vel*vel
+    v2 = v2_sep[:,0] + v2_sep[:,1]
+    # v can also come in handy for calculating the kurtosis later-on
+    v = np.vectorize(math.sqrt)(v2)
+    k = (v**4).mean()/((v**2).mean())**2
+    
+    return k
+
+def computeExcessKurtosis_a2(kurtosis, dimensions):
+    a2 = (dimensions/(dimensions+2))*kurtosis -1
+    
+    return a2

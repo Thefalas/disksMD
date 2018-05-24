@@ -4,27 +4,20 @@ Created on Wed Feb 28 12:53:33 2018
 
 @author: malopez
 """
-import math
+
 import numpy as np
 
 #eps = 500*np.finfo(float).eps # Machine epsilon
 
 def infIfNegative(t):
     #if t <= eps:
-    if t <= 0:
+    if t < 0:
         return 'inf'
+    #elif t==0:
+     #   return eps
     else:
         return t
 
-def nanIfNegative(t):
-    if t <= 0:
-        return math.nan
-    else:
-        return t
-    
-#def deleteInfs(timesList):
-#    timesList = timesList[~np.isin(timesList, ['inf']).any(axis=1)]
-#    return timesList
 
 def saveData(col_number, data_folder, n_particles, pos, vel):
     """ Saves the positions and velocities of every particle to an external
