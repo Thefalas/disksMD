@@ -4,6 +4,7 @@ Created on Thu Mar  8 17:33:47 2018
 
 @author: malopez
 """
+import math
 import numpy as np
 from scipy.stats import kurtosis
 import matplotlib.pyplot as plt
@@ -38,9 +39,11 @@ def velocityDistribution(n_collisions, data_folder):
 #    h2 = np.hstack(h)
     seaborn.set_style('whitegrid')
     seaborn.kdeplot(vel[:,0], bw=0.5)
+    #seaborn.kdeplot(vel[:,0]+vel[:,1], bw=0.5)
     # With former array vel we can plot two histograms (for x and y directions)
-    b = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9]
-    histPlot = plt.hist(vel, density=True, bins=b)
+    #b = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9]
+    #histPlot = plt.hist(vel, density=True, bins=b)
+    histPlot = plt.hist(vel, density=True, bins='auto')
     # Another interesting visualization
 #    histPlot2D = plt.hist2d(vel[:,0], vel[:,1], bins=b)
     return histPlot
@@ -50,3 +53,17 @@ def computeKurtosis(n_collisions, data_folder):
     vel = getStationaryState(n_collisions, data_folder)
     k = kurtosis(vel, fisher=False)
     return k
+
+def computeKurtosisCustom(vel):
+    v2_sep = vel*vel
+    v2 = v2_sep[:,0] + v2_sep[:,1]
+    # v can also come in handy for calculating the kurtosis later-on
+    v = np.vectorize(math.sqrt)(v2)
+    k = (v**4).mean()/((v**2).mean())**2
+    
+    return k
+
+def computeExcessKurtosis_a2(kurtosis, dimensions):
+    a2 = (dimensions/(dimensions+2))*kurtosis -1
+    
+    return a2
