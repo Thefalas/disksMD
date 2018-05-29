@@ -5,6 +5,7 @@ Created on Wed May 16 18:52:50 2018
 @author: malopez
 """
 import numpy as np
+import numba
 from tools import infIfNegative
     
 class CollisionDetector():
@@ -24,8 +25,11 @@ class CollisionDetector():
         # Although stored as an attribute, this can be used as a method of this
         # class in the main program
         self.computeCollisionTime_vectorized = np.vectorize(self.computeCollisionTime)
+        #self.computeCollisionTime_vectorized = numba.vectorize([numba.float32(numba.float32), numba.float64(numba.float64)])(self.computeCollisionTime)
+        
         
     
+
     def computeCollisionTime(self, first_element, second_element, eventType):
         if eventType == 'particleParticle_collision':
             dt = self.particleCollisionTime(first_element, second_element)
@@ -34,6 +38,7 @@ class CollisionDetector():
         return dt
         
     
+
     def wallCollisionTime(self, first_element, second_element):
         """ Returns the time until particle i (first_element) hits a wall """
         x = self.pos[first_element, 0]
@@ -70,11 +75,11 @@ class CollisionDetector():
         
         return t
            
-
+    
     def particleCollisionTime(self, first_element, second_element):
         """ Returns the time until the next collision between particles i, j """
+
         # Quantities required in following formula
-        #r = distance(first_element, second_element, self.pos)
         r = self.measure.distance(first_element, second_element)
         r2 = np.dot(r, r)
         #v = relativeVelocity(first_element, second_element, self.vel)
@@ -84,7 +89,7 @@ class CollisionDetector():
         d = 2*self.particle_radius
         # We name 'inner_term' everything that will fall under the square root 
         inner_term = b*b - v2*(r2 - d*d)
-        
+            
         # We need to filter non-valid results
         if (inner_term<0 or v2<=0 or first_element==second_element):
             t = 'inf'

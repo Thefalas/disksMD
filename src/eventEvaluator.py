@@ -8,11 +8,9 @@ import numpy as np
 from measure import distance, relativeVelocity
 
 class EventEvaluator():
-    def __init__(self, restitution_coef, periodicWalls, periodicSideWalls, inel_leftWall, 
-                 inel_rightWall, inel_topWall, inel_bottomWall, particle_radius, size_X, size_Y):
+    def __init__(self, restitution_coef, inel_leftWall, inel_rightWall, 
+                 inel_topWall, inel_bottomWall, particle_radius, size_X, size_Y):
         self.restitution_coef = restitution_coef
-        self.periodicWalls = periodicWalls
-        self.periodicSideWalls = periodicSideWalls
         self.inel_leftWall = inel_leftWall
         self.inel_rightWall = inel_rightWall
         self.inel_topWall = inel_topWall

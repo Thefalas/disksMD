@@ -6,20 +6,19 @@ Created on Wed May 16 18:56:10 2018
 """
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 from initialization import RandomGenerator
 from tools import saveData
 from statistics import velocityDistribution, computeKurtosis, computeExcessKurtosis_a2, computeKurtosisCustom
 from randomForce import KickGenerator
 from eventLists import EventList
 from eventEvaluator import EventEvaluator
-from propagation import propagate
+from propagation import Propagator
 
 # ------ Settings ------
 
 #data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 data_folder = "../data"
-restitution_coef = 0.55 # Energy lost in particle-particle collisions
+restitution_coef = 0.95 # Energy lost in particle-particle collisions
 
 # If the system is periodic, its 'effective size' may be a little bigger (a diameter in each dimension)
 periodicWalls = False # True if all walls are periodic (a particle would appear on the opposite wall)
@@ -32,11 +31,11 @@ inel_topWall = 1.0
 inel_bottomWall = 1.0
 
 particle_radius = 1.0
-n_particles = 300 # 2 is the minimun number of particles
-desired_collisions_per_particle = 15
+n_particles = 500 # 2 is the minimun number of particles
+desired_collisions_per_particle = 10
 n_collisions = n_particles*desired_collisions_per_particle
-size_X = 100 # System size X
-size_Y = 100 # System size Y
+size_X = 500 # System size X
+size_Y = 500 # System size Y
 abs_time = 0.0 # Just to keep record of absolute time
 baseStateVelocity = 0.7 # Used to initialize the velocities array, std. dev.
 
@@ -69,9 +68,12 @@ events.updateEventList(pos, vel)
 kickGen = KickGenerator(n_particles, baseKickIntensity)
 
 # Initialization of the Event Evaluator
-evEval = EventEvaluator(restitution_coef, periodicWalls, periodicSideWalls, 
-                        inel_leftWall, inel_rightWall, inel_topWall, 
-                        inel_bottomWall, particle_radius, size_X, size_Y)
+evEval = EventEvaluator(restitution_coef, inel_leftWall, inel_rightWall, 
+                        inel_topWall, inel_bottomWall, particle_radius, 
+                        size_X, size_Y)
+
+# We create a propagator object to 'free stream' particles between collisions
+prop = Propagator(size_X, size_Y, periodicWalls, periodicSideWalls)
 
 # We open a file to store temperature and excess kurtosis (a2) data
 file_name_temp = data_folder + '/t_alpha'+str(restitution_coef)+'.dat'
@@ -96,7 +98,7 @@ for c in range(n_collisions):
     # With this dt we can update the global time count, just to keep track of it
     abs_time += dt
     # Then we propagate particles (change positions) until that event
-    pos = propagate(dt, pos, vel)
+    pos = prop.propagate(dt, pos, vel)
     # After that we change the velocities of involved particles by evaluating
     # that event
     vel = evEval.evaluateEvent(nextEvent, vel, pos)

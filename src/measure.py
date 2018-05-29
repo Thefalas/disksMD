@@ -32,16 +32,23 @@ def relativeVelocity(i, j, vel):
 
 
 class MeasureClass():
-    def __init__(self, pos, vel):
+    def __init__(self, pos, vel, periodicWalls, periodicSideWalls, size_X, size_Y):
         self.pos = pos
         self.vel = vel
-        
+        self.size_X = size_X
+        self.size_Y = size_Y
+        self.periodicWalls = periodicWalls
+        self.periodicSideWalls = periodicSideWalls
+    
+
     def distance(self, i, j):
         """ Returns the distance between two particles i, j as a numpy array """
         #i = int(i)
         #j = int(j)
         dist = self.pos[i] - self.pos[j]
+
         return dist
+    
 
     def relativeVelocity(self, i, j):
         """ Measures the relative velocity between two particles i, j as a numpy

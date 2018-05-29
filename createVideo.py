@@ -12,14 +12,18 @@ images_folder = "C:/Users/malopez/Desktop/disksMD/images"
 data_folder = "C:/Users/malopez/Desktop/disksMD/data"
 output_video = './video4.mp4'
 particle_radius = 1.0
-n_particles = 300 # TODO: Why 3 is the minimun number of particles?
-desired_collisions_per_particle = 15
+n_particles = 90 # TODO: Why 3 is the minimun number of particles?
+desired_collisions_per_particle = 10
 n_collisions = n_particles*desired_collisions_per_particle
-size_X = 100 # System size X
-size_Y = 100 # System size Y
+size_X = 60 # System size X
+size_Y = 30 # System size Y
 
+size_X_inches = 6*(size_X/size_Y)
+size_Y_inches = 6
+size_figure = (size_X_inches, size_Y_inches)
 # Fenomenological constant ;p
-circle_size = particle_radius*427500 / (size_X*size_Y)
+circle_size = 11875*size_X_inches*size_Y_inches / (size_X*size_Y)
+# circle_size = particle_radius*427500 / (size_X*size_Y)
 
 
 for i in range(n_collisions):
@@ -28,7 +32,7 @@ for i in range(n_collisions):
                         header = None, names =['x', 'y'])
     
     img_name = images_folder+'/img'+'{0:05d}'.format(i)+".png"
-    fig, ax = plt.subplots(figsize=(6, 6), dpi=250)
+    fig, ax = plt.subplots(figsize=size_figure, dpi=250)
     ax.set_xlim([0,size_X])
     ax.set_ylim([0,size_Y])
     plt.scatter(pos.x, pos.y, s=circle_size)

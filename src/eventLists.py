@@ -5,6 +5,7 @@ Created on Wed May 16 12:39:55 2018
 @author: malopez
 """
 import math
+import numba
 import numpy as np
 import pandas as pd
 from collisionTimes import CollisionDetector
@@ -62,6 +63,12 @@ class EventList():
         wallTimesList = pd.concat((wallTimesList_left, wallTimesList_right, 
                                    wallTimesList_top, wallTimesList_bottom), axis=0)
         
+        # If lateral --boundary conditions-- are periodic we don`t need to 
+        # calculate those particle-wall collisions so there is no need for
+        # them to be on the list
+        if self.periodicSideWalls==True:
+            wallTimesList = pd.concat((wallTimesList_top, wallTimesList_bottom), axis=0)
+        
         
         # The number of elements in particle-particle collision list is
         # factorial(n)/(2*factorial(n-2)) where n=n_particles
@@ -91,14 +98,21 @@ class EventList():
         
         # Joining those two lists into a more general 'events' list.
         times = pd.concat((wallTimesList, particleTimesList), axis=0)
+        
+        # If  --boundary conditions-- are periodic we don`t need to 
+        # calculate those particle-wall collisions so there is no need for
+        # them to be on the list
+        if self.periodicWalls==True:
+            times = particleTimesList
+            
         return times
  
-       
+    @numba.jit   
     def fillList(self, times, pos, vel):
         # TODO: We create an instance of measure class, to measure distances
         # and rel. velocities so that collision times can be calculated.
         # This is done this way to avoid passing pos and vel arrays many times
-        measureObject = MeasureClass(pos, vel)
+        measureObject = MeasureClass(pos, vel, self.periodicWalls, self.periodicSideWalls, self.size_X, self.size_Y)
         # We create an instance of 'CollisionDetector'
         #colDetector = CollisionDetector(pos, vel, self.particle_radius, self.size_X, self.size_Y)
         colDetector = CollisionDetector(measureObject, pos, vel, self.particle_radius, 
