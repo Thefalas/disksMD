@@ -31,6 +31,7 @@ for alpha in alphas:
     mean_a2 = data.iloc[-2000:,1].mean()
     a2s.append(mean_a2)
 
+plt.xkcd()
 plt.scatter(alphas, a2s, marker='o')
 # Fit
 plt.plot(np.unique(alphas), np.poly1d(np.polyfit(alphas, a2s, 10))(np.unique(alphas)))
